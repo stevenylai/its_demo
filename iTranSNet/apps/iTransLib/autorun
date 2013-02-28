@@ -1,0 +1,8 @@
+layout random
+#Plugins to be loaded
+plugin DebugMsgPlugin
+plugin RadioLinkPlugin
+#########################
+executable build/pc/main.exe
+dbg usr2
+nummotes 9

@@ -1,0 +1,13 @@
+event System {
+	int carID;
+	int roadID;
+	int posID;
+}
+event SimpleEvent {
+	int id=System.carID;
+	int roadID=System.roadID;
+	int posID=System.posID;
+} where {
+	id>0
+}
+subscribe SimpleEvent;

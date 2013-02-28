@@ -1,0 +1,389 @@
+<map>
+<floor>
+	<area>
+		<carpark direction="2">
+			<parkslot id="12"/>
+			<wall/>
+			<parkslot id="13"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="14"/>
+			<parkslot id="15"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="16"/>
+			<parkslot id="17"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="18"/>
+			<wall/>
+			<parkslot id="19"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="20"/>
+			<parkslot id="21"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="22"/>
+			<parkslot id="23"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="24"/>
+			<wall/>
+			<parkslot id="25"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="26"/>
+			<parkslot id="1000"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="27"/>
+			<parkslot id="28"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="29"/>
+			<wall/>
+			<parkslot id="30"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="31"/>
+			<parkslot id="32"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="00"/>
+			<parkslot id="00"/>
+			<wall/>
+		</carpark>
+		<road direction="0"/>
+	</area>
+	<area>
+		<carpark direction="1">
+			<parkslot id="11"/>
+		</carpark>
+		<road direction="4" id="0"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="5" id="1"/>
+	</area>
+	<area>
+		<carpark direction="1">
+			<wall/>
+			<parkslot id="10"/>
+			<parkslot id="9"/>
+		</carpark>
+		<road direction="0"/>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="136"/>
+			<parkslot id="135"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="134"/>
+			<wall/>
+			<parkslot id="133"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="132"/>
+			<parkslot id="131"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="130"/>
+			<parkslot id="129"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="128"/>
+			<wall/>
+			<parkslot id="127"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="126"/>
+			<parkslot id="125"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="124"/>
+			<parkslot id="123"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="122"/>
+			<wall/>
+			<parkslot id="121"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="120"/>
+			<parkslot id="119"/>
+		</carpark>
+		<road direction="2"/>
+		<carpark direction="3">
+			<wall/>
+			<parkslot id="00"/>
+			<parkslot id="00"/>
+		</carpark>
+	</area>
+	<area>
+		<carpark direction="1">
+			<parkslot id="8"/>
+			<wall/>
+			<parkslot id="7"/>
+		</carpark>
+		<road direction="0"/>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="101"/>
+			<parkslot id="102"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="103"/>
+			<wall/>
+			<parkslot id="104"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="105"/>
+			<parkslot id="106"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="107"/>
+			<parkslot id="108"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="109"/>
+			<wall/>
+			<parkslot id="110"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="111"/>
+			<parkslot id="112"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="113"/>
+			<parkslot id="114"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="115"/>
+			<wall/>
+			<parkslot id="116"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="117"/>
+			<parkslot id="118"/>
+		</carpark>
+		<road direction="2"/>
+		<carpark direction="3">
+			<parkslot id="00"/>
+			<wall/>
+			<parkslot id="36"/>
+		</carpark>
+	</area>
+	<area>
+		<carpark direction="1">
+			<parkslot id="6"/>
+			<parkslot id="5"/>
+		</carpark>
+		<road direction="4" id="2"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="1"/>
+		<road direction="5" id="3"/>
+		<carpark direction="3">
+			<parkslot id="37"/>
+			<parkslot id="38"/>
+		</carpark>
+	</area>
+	<area>
+		<carpark direction="1">
+			<wall/>
+			<parkslot id="4"/>
+			<parkslot id="3"/>
+		</carpark>
+		<road direction="0"/>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="100"/>
+			<parkslot id="99"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="98"/>
+			<wall/>
+			<parkslot id="97"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="96"/>
+			<parkslot id="95"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="94"/>
+			<parkslot id="93"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="92"/>
+			<wall/>
+			<parkslot id="91"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="90"/>
+			<parkslot id="89"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="88"/>
+			<parkslot id="87"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="86"/>
+			<wall/>
+			<parkslot id="85"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="84"/>
+			<parkslot id="83"/>
+		</carpark>
+		<road direction="2"/>
+		<carpark direction="3">
+			<wall/>
+			<parkslot id="39"/>
+			<parkslot id="40"/>
+		</carpark>
+	</area>
+	<area>
+		<carpark direction="1">
+			<parkslot id="2"/>
+			<wall/>
+			<parkslot id="1"/>
+		</carpark>
+		<road direction="0"/>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="65"/>
+			<parkslot id="66"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="67"/>
+			<wall/>
+			<parkslot id="68"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="69"/>
+			<parkslot id="70"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="71"/>
+			<parkslot id="72"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="73"/>
+			<wall/>
+			<parkslot id="74"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="75"/>
+			<parkslot id="76"/>
+		</carpark>
+		<carpark direction="2">
+			<wall/>
+			<parkslot id="77"/>
+			<parkslot id="78"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="79"/>
+			<wall/>
+			<parkslot id="80"/>
+		</carpark>
+		<carpark direction="2">
+			<parkslot id="81"/>
+			<parkslot id="82"/>
+		</carpark>
+		<road direction="2"/>
+		<carpark direction="3">
+			<parkslot id="41"/>
+			<wall/>
+		</carpark>
+	</area>
+	<area>
+		<road direction="3"/>
+	</area>
+	<area>
+		<carpark direction="0">
+			<parkslot id="1000"/>
+			<wall/>
+			<parkslot id="64"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="63"/>
+			<parkslot id="62"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="61"/>
+			<parkslot id="60"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="59"/>
+			<wall/>
+			<parkslot id="58"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="57"/>
+			<parkslot id="56"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="55"/>
+			<parkslot id="54"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="53A"/>
+			<wall/>
+			<parkslot id="53"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="52"/>
+			<parkslot id="51A"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="1000"/>
+			<parkslot id="51"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="50"/>
+			<wall/>
+			<parkslot id="49"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="48"/>
+			<parkslot id="47"/>
+		</carpark>
+		<carpark direction="0">
+			<wall/>
+			<parkslot id="46"/>
+			<parkslot id="45"/>
+		</carpark>
+		<carpark direction="0">
+			<parkslot id="44"/>
+		</carpark>
+	</area>
+</floor>
+</map>

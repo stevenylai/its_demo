@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% for e in events %}
+Event <a href="detail/{{ e.pk }}/">{{ e.subID.eventName }}</a> detected at {{ e.pubTime }}<br/>
+{% endfor %}
+
+{% endblock %}

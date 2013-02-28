@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block script %}
+<script type="text/javascript" src="static/js/wz_jsgraphics.js"></script>
+<script type="text/javascript" src="static/js/ajax.js"></script>
+<script type="text/javascript" src="static/js/its_map.js"></script>
+<script language="JavaScript"><!--
+	var map=null;
+	var canvas='its_map';
+	function initMap() {
+		if (document.getElementById(canvas)==null)
+			return;
+		map=new ITSMap("static/VehicleTracking.jpg", canvas);
+		map.loadSelection();
+		map.paintMap();
+	}
+	function getCoordinates(event) {
+		pos_x = event.offsetX?(event.offsetX):event.pageX-document.getElementById(canvas).offsetLeft;
+		pos_y = event.offsetY?(event.offsetY):event.pageY-document.getElementById(canvas).offsetTop;
+		//pos_x = event.offsetX?(event.offsetX):event.pageX;
+		//pos_y = event.offsetY?(event.offsetY):event.pageY;
+		document.pointform.form_x.value = pos_x;
+		document.pointform.form_y.value = pos_y;
+
+		map.clicked(pos_x, pos_y);
+		map.saveSelection();
+		map.paintMap();
+	}
+	function ajax_handler(response) {
+		if (map!=null) {
+			map.updateNotified(response);
+			map.paintMap();
+		}
+		document.pointform.notified.value=response;
+	}
+	function checkForUpdate() {
+		if (map==null)
+			initMap();
+		var ajax=new Ajax();
+		ajax.responseType = Ajax.RAW; 
+		ajax.requireLogin = true;
+		ajax.ondone=ajax_handler
+		ajax.post("trafficjampub/");
+		setTimeout (function() {checkForUpdate();}, 1000);
+	}
+
+	window.onload=initMap;
+	setTimeout (function() {checkForUpdate();}, 1000);
+//-->
+</script>
+
+{% endblock %}
+{% block content %}
+<form name="pointform" action="" method="post"> {% csrf_token %}
+<input type="hidden" name="selected" value="{{ selected }}"/>
+<input type="hidden" name="notified" value=""/>
+<!--position here must not be static-->
+<div id="its_map" name="its_map" onclick="getCoordinates(event)" style="position:relative;margin-left:0px;width:770;height:562;">
+</div>
+You pointed on x = <input type="text" name="form_x" size="4" /> - y = <input type="text" name="form_y" size="4" /><br/>
+Number of cars:
+<select name="threshold">
+	<option value="1">1</option>
+	<option value="2">2</option>
+	<option value="3">3</option>
+	<option value="4">4</option>
+</select>
+<input type="submit" name="sub" value="Subscribe" />
+</form>
+{% endblock %}

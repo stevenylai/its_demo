@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<form action="" method="post"> {% csrf_token %}
+	<label>Event Definition:</label><br/>
+	{% if sub %}
+	<textarea NAME="sub" COLS=40 ROWS=15>{{sub}}</textarea> <br/>
+	{% else %}
+	<textarea NAME="sub" COLS=40 ROWS=5></textarea> <br/>
+	{% endif %}
+	<input type="submit" value="Subscribe" />
+</form>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+Event {{instance.subID.eventName}} is detected at {{instance.pubTime}}. Contents:<br\>
+<table border="1">
+	{% for a in attributes %}
+	<tr>
+		<td>{{a.attributeID.attributeName}}</td>
+		<td>{{a.value}}</td>
+	</tr>
+	{% endfor %}
+</table>
+
+{% endblock %}

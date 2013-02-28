@@ -1,0 +1,12 @@
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">	<table cellpadding="0" cellspacing="0" width="180px">
+    	<tr>
+        	<td><h2>Functions</h2></td>
+        </tr> 
+        
+		<tr><td><li><a href="../User_pro.php">Program</a></li></td></tr>
+        <tr><td><li><a href="../configure.php">Configure</a></li></td></tr>
+        <tr><td><li><a href="../network.php">Network</a></li></td></tr>
+        <tr><td><li><a href="../performance_list.php">Performance</a></li></td></tr>
+        <tr><td><li><a href="../history_list.php">History</a></li></td></tr>
+		<tr><td><li><a href="../Log.php">Log</a></li></td></tr> 
+    </table>

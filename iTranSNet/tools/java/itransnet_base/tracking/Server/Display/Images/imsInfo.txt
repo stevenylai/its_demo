@@ -1,0 +1,35 @@
+
+// imsInfo.txt images
+s 1.gif 8
+s 2.gif 8
+s 3.gif 8
+s 4.gif 8
+s 5.gif 8
+s 6.gif 8
+s 7.gif 8
+s 8.gif 8
+s 9.gif 8
+s 10.gif 8
+s 11.gif 8
+s 12.gif 8
+s 13.gif 8
+s 14.gif 8
+s 15.gif 8
+s 16.gif 8
+s 17.gif 8
+s 18.gif 8
+s 19.gif 8
+s 20.gif 8
+s 21.gif 8
+s 22.gif 8
+s 23.gif 8
+s 24.gif 8
+s 25.gif 8
+s 26.gif 8
+s 27.gif 8
+s 28.gif 8
+s 29.gif 8
+s 30.gif 8
+s 31.gif 8
+s 32.gif 8
+o real_map.jpg

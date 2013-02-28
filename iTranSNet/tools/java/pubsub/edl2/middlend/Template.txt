@@ -1,0 +1,18 @@
+package pubsub.edl.ast;
+import java.util.*;
+
+public class TEMP extends GenericTreeNode {
+	String oper;
+	public TEMP() {
+		createChildren();
+	}
+	public TEMP (String oper) {
+		this(); this.oper=oper;
+	}
+	public String getName () {
+		if (oper==null)
+			return "Nonterminal: TEMP";
+		else
+			return "Nonterminal: TEMP "+oper;
+	}
+}

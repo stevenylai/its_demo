@@ -1,0 +1,22 @@
+// Dummy Sensor for testing
+package itransnet_base.DataEngine;
+
+import java.util.*;
+
+public class DummySensor implements Sensor
+{
+	private int packetNum, channelID, moteID;
+	private Vector data;
+	
+	public DummySensor() {data = new Vector();}
+	public DummySensor(int i) {data = new Vector(); moteID=i;}
+	
+	public int getPacketNum() {return packetNum;}
+	public int getChannelID() {return channelID;}
+	public int getID() {return moteID;}
+	
+	public void setPacketNum(int i) {packetNum=i;}
+	public void setChannelID(int i) {channelID=i;}
+	public void setID(int i) {moteID=i;}
+	public void addData(int i) {data.add(new Integer(i));}
+}
