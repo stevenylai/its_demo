@@ -1,7 +1,7 @@
 JAVAC = javac
 MIG = mig
 VEHICLE_DIR = ../../../apps/Vehicle
-MESSAGES = MoteToBaseMsg MoteToBaseMsg
+MESSAGES = MoteToBaseMsg BaseToMoteMsg
 
 all: $(addsuffix .class,$(MESSAGES))
 clean:
