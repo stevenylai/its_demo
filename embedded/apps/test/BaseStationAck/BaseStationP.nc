@@ -73,7 +73,7 @@ module BaseStationP @safe() {
     interface Receive as RadioSnoop[am_id_t id];
     interface Packet as RadioPacket;
     interface AMPacket as RadioAMPacket;
-    interface PacketAcknowledgements as RadioAckowledgement;
+    interface PacketAcknowledgements as RadioAck;
 
     interface Leds;
   }
@@ -290,10 +290,8 @@ implementation
     call RadioPacket.clear(msg);
     call RadioAMPacket.setSource(msg, source);
     
-    if (addr != AM_BROADCAST_ADDR) {
-      call RadioAckowledgement.requestAck(msg);
-    }
-    if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
+    call RadioAck.requestAck(msg);
+    if (call RadioSend.send[id](TOS_NODE_ID?0:addr, msg, len) == SUCCESS)
       call Leds.led0Toggle();
     else
       {
@@ -303,12 +301,9 @@ implementation
   }
 
   event void RadioSend.sendDone[am_id_t id](message_t* msg, error_t error) {
-    am_addr_t addr;
-    if (error != SUCCESS)
+    if (error != SUCCESS || !(call RadioAck.wasAcked(msg)))
       failBlink();
     else {
-      addr = call RadioAMPacket.destination(msg);
-      if (addr == AM_BROADCAST_ADDR || call RadioAckowledgement.wasAcked(msg))
       atomic
 	if (msg == radioQueue[radioOut])
 	  {

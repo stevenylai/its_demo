@@ -11,8 +11,7 @@ module VehicleC {
   uses interface Receive as RadioReceive;
   uses interface PacketAcknowledgements as RadioAckowledgement;
   uses interface SplitControl as RadioSplitControl;
-}
-implementation {
+} implementation {
 
   message_t pkt;
   bool radio_busy = FALSE;
@@ -30,50 +29,52 @@ implementation {
     	call RadioSplitControl.start();
     }
   }
-
   event void RadioSplitControl.stopDone(error_t err) {
   }
 
+  task void radioSendTask() {
+    call RadioAckowledgement.requestAck(&pkt);
+    if (call RadioSend.send(0, &pkt, sizeof(MoteToBaseMsg)) == SUCCESS) {
+      atomic radio_busy = TRUE;
+    } else {
+      post radioSendTask();
+    }
+  }
   event void Timer0.fired() {
     counter++;
+    atomic
     if (!radio_busy) {
       MoteToBaseMsg* ppkt = (MoteToBaseMsg*)(call RadioPacket.getPayload(&pkt, sizeof(MoteToBaseMsg)));
       if (ppkt == NULL) {
-	return;
+	      return;
       }
       ppkt->nodeid = TOS_NODE_ID;
       ppkt->dir = 0x02;
       ppkt->icnum = 51;
       ppkt->speed = counter;
-      call RadioAckowledgement.requestAck(&pkt);
-      if (call RadioSend.send(0, &pkt, sizeof(MoteToBaseMsg)) == SUCCESS) {
-        radio_busy = TRUE;
-      }
+      post radioSendTask();
     }
   }
 
   event void RadioSend.sendDone(message_t* msg, error_t err) {
-    if(call RadioAckowledgement.wasAcked(msg)) {
-      radio_busy = FALSE;
-      call Leds.set(counter);
+    if(!err && call RadioAckowledgement.wasAcked(msg)) {
+      atomic radio_busy = FALSE;
     } else {
-      call RadioAckowledgement.requestAck(msg);
-      if (call RadioSend.send(0, msg, sizeof(MoteToBaseMsg)) != SUCCESS) {
-	radio_busy = FALSE;
-      }
+      post radioSendTask();
+      call Leds.led0Toggle();
     }
   }
 
   event message_t* RadioReceive.receive(message_t* msg, void* payload, uint8_t len){
     if (len != sizeof(BaseToMoteMsg)) {
-	return msg;
+	    return msg;
     } else {
       BaseToMoteMsg* ppkt = (BaseToMoteMsg*)payload;
       call Leds.set(ppkt -> nodeid);
       if (radio_busy) {
-          return msg;
+        return msg;
       } else {
-	// Send to serial
+	      // Send to serial
       }
     }
     return msg;

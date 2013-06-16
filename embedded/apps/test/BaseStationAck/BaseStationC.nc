@@ -92,7 +92,7 @@ implementation {
   BaseStationP.UartAMPacket -> Serial;
   
   BaseStationP.RadioSend -> Radio;
-  BaseStationP.RadioAckowledgement -> Radio;
+  BaseStationP.RadioAck -> Radio;
   BaseStationP.RadioReceive -> Radio.Receive;
   BaseStationP.RadioSnoop -> Radio.Snoop;
   BaseStationP.RadioPacket -> Radio;
