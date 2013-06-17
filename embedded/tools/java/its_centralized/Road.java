@@ -4,12 +4,10 @@ class Road {
   public int startIC;
   public int endIC;
   public int capacity;
-  public ArrayList <Vehicle> cars;
-  public Dictionary <int, Road> startIntersection;
-  public Dictionary <int, Road> endIntersection;
+  public List <Car> cars;
+  public Dictionary <Integer, Road> exitRoads;
   public Road () {
-    this.cars = new ArrayList<Vehicle>();
-    this.startIntersection = new Dictionary <int, Road>();
-    this.endIntersection = new Dictionary <int, Road>();
+    this.cars = new ArrayList<Car>();
+    this.exitRoads = new Hashtable <Integer, Road>();
   }
 }

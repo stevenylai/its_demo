@@ -4,11 +4,11 @@ import net.tinyos.message.*;
 import net.tinyos.packet.*;
 import net.tinyos.util.*;
 
-public class TestSerial implements MessageListener {
+public class Packet implements MessageListener {
 
   private MoteIF moteIF;
   
-  public TestSerial(MoteIF moteIF) {
+  public Packet(MoteIF moteIF) {
     this.moteIF = moteIF;
     this.moteIF.registerListener(new MoteToBaseMsg(), this);
   }
@@ -19,18 +19,17 @@ public class TestSerial implements MessageListener {
     
     try {
       while (true) {
-	System.out.println("Sending packet " + counter);
-	//payload.set_nodeid(1);
-	//payload.set_dir((short)15);
-	//payload.set_IC_NO((short)73);
-	//payload.set_speed(counter);
-	moteIF.send(0, payload);
-	counter++;
-	try {Thread.sleep(1000);}
-	catch (InterruptedException exception) {}
+	      System.out.println("Sending packet " + counter);
+	      //payload.set_nodeid(1);
+	      //payload.set_dir((short)15);
+	      //payload.set_IC_NO((short)73);
+	      //payload.set_speed(counter);
+	      moteIF.send(0, payload);
+	      counter++;
+	      try {Thread.sleep(1000);}
+	      catch (InterruptedException exception) {}
       }
-    }
-    catch (IOException exception) {
+    } catch (IOException exception) {
       System.err.println("Exception thrown when sending packets. Exiting.");
       System.err.println(exception);
     }
