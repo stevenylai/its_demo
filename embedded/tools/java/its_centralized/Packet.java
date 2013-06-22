@@ -74,6 +74,4 @@ public class Packet implements MessageListener {
       Thread.yield();
     }
   }
-
-
 }
