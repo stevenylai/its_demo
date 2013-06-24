@@ -3,8 +3,10 @@
 
 typedef nx_struct BaseToMoteMsg {
   nx_uint16_t nodeid;
-  nx_uint8_t cmd;
-  nx_uint16_t data;
+  nx_uint8_t dir;
+  nx_uint16_t speed;
+  //nx_uint8_t cmd;
+  //nx_uint16_t data;
 } BaseToMoteMsg;
 
 typedef nx_struct MoteToBaseMsg {

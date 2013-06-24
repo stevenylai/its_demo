@@ -1,11 +1,11 @@
 import java.util.*;
 
-class Map {
+class Map implements ITSReceiver{
   private static boolean debug = false;
   public Dictionary <Integer, Car> cars;
   public Dictionary <Integer, Road> startRoads;
   public Dictionary <Integer, Road> endRoads;
-  public Packet packet;
+  public ITSSender sender;
 
   private void constructMap () {
     for (int x=0; x<MapInfo.roadInfo.size(); x++) { // Add all roads
@@ -58,8 +58,8 @@ class Map {
 
     }
   }
-  public Map (Packet packet) {
-    this.packet = packet;
+  public Map (ITSSender sender) {
+    this.sender = sender;
     this.cars = new Hashtable <Integer, Car> ();
     this.startRoads = new Hashtable <Integer, Road> ();
     this.endRoads = new Hashtable <Integer, Road> ();
@@ -67,12 +67,14 @@ class Map {
   }
   private void stopCar (Car car) {
     // TODO: Send command to stop the car
+    sender.sendMsg(car.id, 0, 0);
   }
   private void turnCar (Car car, Road road) {
     for (Enumeration<Integer> e = car.belongs.exitRoads.keys(); e.hasMoreElements();) {
       Integer turn = e.nextElement();
       if (car.belongs.exitRoads.get(turn) == road) {
         // TODO: Send command to turn the car
+        sender.sendMsg(car.id, turn.intValue(), car.speed);
       }
     }
   }
@@ -115,7 +117,7 @@ class Map {
       return false;
     }
   }
-  public void update (int carID, int dir, int pos, int speed) {
+  public void receiveMsg (int carID, int dir, int pos, int speed) {
     Road start = this.startRoads.get(new Integer(pos));
     Road end = null;
     Car car = this.cars.get(new Integer(carID));

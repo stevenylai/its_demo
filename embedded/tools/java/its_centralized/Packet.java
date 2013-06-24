@@ -1,31 +1,32 @@
 import java.io.IOException;
+import java.util.*;
 
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
 import net.tinyos.util.*;
 
-public class Packet implements MessageListener {
+public class Packet implements MessageListener, ITSSender {
 
   private MoteIF moteIF;
+  private List<ITSReceiver> msgListeners;
   
   public Packet(MoteIF moteIF) {
     this.moteIF = moteIF;
     this.moteIF.registerListener(new MoteToBaseMsg(), this);
+    this.msgListeners = new ArrayList<ITSReceiver>();
   }
 
-  public void sendPackets() {
-    int counter = 0;
+  public void sendMsg(int id, int dir, int speed) {
     BaseToMoteMsg payload = new BaseToMoteMsg();
     
     try {
       while (true) {
-	      System.out.println("Sending packet " + counter);
-	      //payload.set_nodeid(1);
-	      //payload.set_dir((short)15);
+	      System.out.println("Sending packet ");
+	      payload.set_nodeid(id);
+	      payload.set_dir((short)15);
 	      //payload.set_IC_NO((short)73);
-	      //payload.set_speed(counter);
+	      payload.set_speed(speed);
 	      moteIF.send(0, payload);
-	      counter++;
 	      try {Thread.sleep(1000);}
 	      catch (InterruptedException exception) {}
       }
@@ -35,9 +36,15 @@ public class Packet implements MessageListener {
     }
   }
 
+  public void addITSListener (ITSReceiver receiver) {
+    this.msgListeners.add(receiver);
+  }
   public void messageReceived(int to, Message message) {
     MoteToBaseMsg msg = (MoteToBaseMsg)message;
     System.out.println("Received packet sequence number " + msg.get_speed());
+    for (ITSReceiver receiver : this.msgListeners) {
+      receiver.receiveMsg(msg.get_nodeid(), msg.get_dir(), msg.get_icnum(), msg.get_speed());
+    }
   }
   
   private static void usage() {
@@ -48,8 +55,8 @@ public class Packet implements MessageListener {
     String source = null;
     if (args.length == 2) {
       if (!args[0].equals("-comm")) {
-	usage();
-	System.exit(1);
+        usage();
+      	System.exit(1);
       }
       source = args[1];
     }
@@ -68,8 +75,10 @@ public class Packet implements MessageListener {
     }
 
     MoteIF mif = new MoteIF(phoenix);
-    TestSerial serial = new TestSerial(mif);
-    //serial.sendPackets();
+    Packet comm = new Packet(mif);
+    Map its_map = new Map(comm);
+    comm.addITSListener(its_map);
+
     while (true) {
       Thread.yield();
     }
