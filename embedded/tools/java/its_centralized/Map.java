@@ -90,19 +90,28 @@ class Map implements ITSReceiver{
     if (car.status == Car.LEAVING) {
       if (car.belongs.cross != null) {
         // 1. Collision avoidance
-        car.belongs.cross.waiting.add(car);
-        if (car.belongs.cross.waiting.size() > 1) {
+	if (!car.belongs.cross.waiting.contains(car) ) {
+	  car.belongs.cross.waiting.add(car);
+	}
+        if (car.belongs.cross.waiting.size() > 1 && !car.stopped) {
+	  System.out.println(car.toString() + " is stopped to avoid collision");
           car.stopped = true;
           this.stopCar(car);
-        }
+        } else if (car.belongs.cross.waiting.size() <= 1 && car.stopped) {
+	  System.out.println(car.toString() + " is no longer in collision state");
+	  car.stopped = false;
+	}
       }
       if (!car.stopped) { // Not stopped, need to choose exit
         Road exit = car.belongs.chooseExit();
         if (exit == null) { // All exit roads are full, stop the car
+	  System.out.println(car.toString() + " is stopped because there is no exit available");
           car.stopped = true;
           this.stopCar(car);
-        } else
+        } else {
+	  System.out.println(car.toString() + " is instructed to switch to " + exit.toString());
           this.turnCar(car, exit);
+	}
       }
     } else {
       // Not doing anything for now but we may need to adjust the car's speed here in the future
@@ -127,7 +136,9 @@ class Map implements ITSReceiver{
     if (car == null) {
       car = new Car(carID, start==null?end:start);
       car.status = (start==null?Car.LEAVING:car.ENTERING);
+      this.cars.put(new Integer(car.id), car);
     } else if (stateIsUnchanged(car, start, end)) {
+      //System.out.println("Status is unchanged: " + car.toString());
       // Do nothing for now (may need to adjust speed later on)
       return;
     } else {

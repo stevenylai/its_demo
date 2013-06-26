@@ -27,4 +27,7 @@ class Road {
     } else
       return null;
   }
+  public String toString() {
+    return "Road: " + Integer.toString(this.startIC) + ", " + Integer.toString(this.endIC);
+  }
 }
