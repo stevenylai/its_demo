@@ -23,7 +23,7 @@ public class Packet implements MessageListener, ITSSender {
       while (true) {
 	      System.out.println("Sending packet ");
 	      payload.set_nodeid(id);
-	      payload.set_dir((short)15);
+	      payload.set_dir((short)dir);
 	      //payload.set_IC_NO((short)73);
 	      payload.set_speed(speed);
 	      moteIF.send(0, payload);
@@ -41,7 +41,7 @@ public class Packet implements MessageListener, ITSSender {
   }
   public void messageReceived(int to, Message message) {
     MoteToBaseMsg msg = (MoteToBaseMsg)message;
-    System.out.println("Received packet sequence number " + msg.get_speed());
+    System.out.println("Received packet " + msg);
     for (ITSReceiver receiver : this.msgListeners) {
       receiver.receiveMsg(msg.get_nodeid(), msg.get_dir(), msg.get_icnum(), msg.get_speed());
     }

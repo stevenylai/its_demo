@@ -1,3 +1,3 @@
-COMPONENT=BaseStationC
+COMPONENT=TestBareUARTC
 CFLAGS+=-v
 include $(MAKERULES)
