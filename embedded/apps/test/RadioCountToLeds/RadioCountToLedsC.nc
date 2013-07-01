@@ -105,7 +105,6 @@ implementation {
       rcm->counter = counter;
       enableAckErr = call RadioAck.requestAck(&packet);
       if (call AMSend.send(TOS_NODE_ID?0:1, &packet, sizeof(radio_count_msg_t)) == SUCCESS) {
-      //if (call AMSend.send(AM_BROADCAST_ADDR, &packet, sizeof(radio_count_msg_t)) == SUCCESS) {
 	      dbg("RadioCountToLedsC", "RadioCountToLedsC: packet sent.\n", counter);	
 	      locked = TRUE;
       }
