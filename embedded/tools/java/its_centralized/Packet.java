@@ -16,24 +16,29 @@ public class Packet implements MessageListener, ITSSender {
     this.msgListeners = new ArrayList<ITSReceiver>();
   }
 
-  public void sendMsg(int id, int dir, int speed) {
-    BaseToMoteMsg payload = new BaseToMoteMsg();
-    
-    try {
-      while (true) {
-	      System.out.println("Sending packet ");
-	      payload.set_nodeid(id);
-	      payload.set_dir((short)dir);
-	      //payload.set_IC_NO((short)73);
-	      payload.set_speed(speed);
-	      moteIF.send(0, payload);
-	      try {Thread.sleep(1000);}
-	      catch (InterruptedException exception) {}
+  private void sendPacket(int id, BaseToMoteMsg cmd) {
+    boolean success = false;
+    while (!success) {
+      try {
+	      System.out.println("Sending packet " + cmd);
+  	    moteIF.send(id, cmd);
+        success = true;
+      } catch (IOException e) {
+        success = false;
       }
-    } catch (IOException exception) {
-      System.err.println("Exception thrown when sending packets. Exiting.");
-      System.err.println(exception);
     }
+  }
+  public void setSpeed(int id, int speed) {
+    BaseToMoteMsg cmd = new BaseToMoteMsg();
+    cmd.set_cmd((short)0x01);
+    cmd.set_data(speed);
+    sendPacket(id, cmd);
+  }
+  public void setDir(int id, int dir) {
+    BaseToMoteMsg cmd = new BaseToMoteMsg();
+    cmd.set_cmd((short)0x02);
+    cmd.set_data(dir);
+    sendPacket(id, cmd);
   }
 
   public void addITSListener (ITSReceiver receiver) {
@@ -41,9 +46,10 @@ public class Packet implements MessageListener, ITSSender {
   }
   public void messageReceived(int to, Message message) {
     MoteToBaseMsg msg = (MoteToBaseMsg)message;
-    System.out.println("Received packet " + msg);
+    SerialPacket serialMsg = message.getSerialPacket();
+    //System.out.println("Received packet " + msg + " Serial packet " + serialMsg);
     for (ITSReceiver receiver : this.msgListeners) {
-      receiver.receiveMsg(msg.get_nodeid(), msg.get_dir(), msg.get_icnum(), msg.get_speed());
+      receiver.receiveMsg(serialMsg.get_header_src(), msg.get_dir(), msg.get_icnum(), msg.get_speed());
     }
   }
   

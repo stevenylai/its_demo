@@ -7,6 +7,18 @@ class Map implements ITSReceiver{
   public Dictionary <Integer, Road> endRoads;
   public ITSSender sender;
 
+  static public String getDirString (int dir) {
+    switch (dir) {
+    case 0:
+      return "right";
+    case 1:
+      return "straight";
+    case 2:
+      return "left";
+    default:
+      return "unknown";
+    }
+  }
   private void constructMap () {
     for (int x=0; x<MapInfo.roadInfo.size(); x++) { // Add all roads
       int [] roadInfo = MapInfo.roadInfo.get(x);
@@ -22,16 +34,9 @@ class Map implements ITSReceiver{
       for (int y=3; y<3+3; y++) {
         if (roadInfo[y]>=0) {
           Road exit = startRoads.get(new Integer(roadInfo[y]));
-          start.exitRoads.put(new Integer(roadInfo[y]), exit);
+          start.exitRoads.put(new Integer(y-3), exit);
           if (debug) {
-            String direction = "None";
-            if (y==3)
-              direction = "right";
-            else if (y==4)
-              direction = "straight";
-            else
-               direction = "left";
-            System.out.println("Connected road: " + Integer.toString(exit.startIC) + " - " + Integer.toString(exit.endIC) + " to " + direction + " of road: " + Integer.toString(start.startIC) + " - " + Integer.toString(start.endIC));
+            System.out.println("Connected road: " + Integer.toString(exit.startIC) + " - " + Integer.toString(exit.endIC) + " to " + getDirString(y-3) + " of road: " + Integer.toString(start.startIC) + " - " + Integer.toString(start.endIC));
           }
         }
       }
@@ -66,15 +71,26 @@ class Map implements ITSReceiver{
     this.constructMap();
   }
   private void stopCar (Car car) {
-    // TODO: Send command to stop the car
-    sender.sendMsg(car.id, 0, 0);
+    if (!car.stopped) {
+      car.stopped = true;
+      sender.setSpeed(car.id, 0);
+    }
+  }
+  private void startCar (Car car) {
+    if (car.stopped) {
+      car.stopped = false;
+      sender.setSpeed(car.id, car.speed);
+    }
   }
   private void turnCar (Car car, Road road) {
     for (Enumeration<Integer> e = car.belongs.exitRoads.keys(); e.hasMoreElements();) {
       Integer turn = e.nextElement();
       if (car.belongs.exitRoads.get(turn) == road) {
-        // TODO: Send command to turn the car
-        sender.sendMsg(car.id, turn.intValue(), car.speed);
+        if (turn.intValue() == 1) // 1: straight - no need to turn
+          sender.setDir(car.id, 0<<8|car.getCurrentIC());
+        else
+          sender.setDir(car.id, 1<<8|car.getCurrentIC());
+     
       }
     }
   }
@@ -87,31 +103,31 @@ class Map implements ITSReceiver{
     }
   }
   private void checkCar (Car car) {
+    boolean tryToStartCar = false;
     if (car.status == Car.LEAVING) {
       if (car.belongs.cross != null) {
         // 1. Collision avoidance
-	if (!car.belongs.cross.waiting.contains(car) ) {
-	  car.belongs.cross.waiting.add(car);
-	}
+	      if (!car.belongs.cross.waiting.contains(car) ) {
+	        car.belongs.cross.waiting.add(car);
+	      }
         if (car.belongs.cross.waiting.size() > 1 && !car.stopped) {
-	  System.out.println(car.toString() + " is stopped to avoid collision");
-          car.stopped = true;
+	        System.out.println(car.toString() + " is stopped to avoid collision");
           this.stopCar(car);
         } else if (car.belongs.cross.waiting.size() <= 1 && car.stopped) {
-	  System.out.println(car.toString() + " is no longer in collision state");
-	  car.stopped = false;
-	}
+	        System.out.println(car.toString() + " is no longer in collision state, trying to start it ...");
+          tryToStartCar = true;
+	      }
       }
-      if (!car.stopped) { // Not stopped, need to choose exit
+      if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
         Road exit = car.belongs.chooseExit();
         if (exit == null) { // All exit roads are full, stop the car
-	  System.out.println(car.toString() + " is stopped because there is no exit available");
-          car.stopped = true;
+	        System.out.println(car.toString() + " is stopped because there is no exit available");
           this.stopCar(car);
         } else {
-	  System.out.println(car.toString() + " is instructed to switch to " + exit.toString());
+	        System.out.println(car.toString() + " is instructed to switch to " + exit.toString());
+          this.startCar(car);
           this.turnCar(car, exit);
-	}
+	      }
       }
     } else {
       // Not doing anything for now but we may need to adjust the car's speed here in the future
@@ -146,8 +162,10 @@ class Map implements ITSReceiver{
         car.switchTo(start);
         car.status = Car.ENTERING;
       } else { // Preparing to exit a road
+        car.switchTo(end);
         car.status = Car.LEAVING;
       }
+      System.out.println("Car: " + car);
     }
     this.checkCar(car);
     this.checkStoppedCars();

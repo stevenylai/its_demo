@@ -1,3 +1,2 @@
 COMPONENT=BaseStationC
-CFLAGS+=-v
 include $(MAKERULES)

@@ -18,13 +18,16 @@ public class TestMap implements ITSSender {
   public void run () {
     for (int[] msg : this.msgs) {
       for (ITSReceiver receiver : this.msgListeners) {
-	System.out.println("Receiving message:" + Integer.toString(msg[0]) + " " + Integer.toString(msg[1]) + " " + Integer.toString(msg[2]) + " " + Integer.toString(msg[3]));
-	receiver.receiveMsg(msg[0], msg[1], msg[2], msg[3]);
+	      System.out.println("Receiving message:" + Integer.toString(msg[0]) + " " + Integer.toString(msg[1]) + " " + Integer.toString(msg[2]) + " " + Integer.toString(msg[3]));
+	      receiver.receiveMsg(msg[0], msg[1], msg[2], msg[3]);
       }
     }
   }
-  public void sendMsg(int id, int dir, int speed) {
-    System.out.println("Sending to id: "+Integer.toString(id)+", dir: "+Integer.toString(dir)+", speed: "+Integer.toString(speed));
+  public void setSpeed(int id, int speed) {
+    System.out.println("Setting speed of car : "+Integer.toString(id)+" to: "+Integer.toString(speed));
+  }
+  public void setDir(int id, int dir) {
+    System.out.println("Setting dir of car : "+Integer.toString(id)+" to: "+Map.getDirString(dir));
   }
   public static void main(String[] args) throws Exception {
     TestMap tester = new TestMap();

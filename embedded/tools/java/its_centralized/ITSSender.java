@@ -1,3 +1,4 @@
 public interface ITSSender {
-  public void sendMsg(int id, int dir, int speed);
+  public void setSpeed(int id, int speed);
+  public void setDir(int id, int dir);
 }

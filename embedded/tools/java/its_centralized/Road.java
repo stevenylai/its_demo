@@ -19,7 +19,7 @@ class Road {
     for (Enumeration<Road> e = this.exitRoads.elements(); e.hasMoreElements();) {
       Road candidate = e.nextElement();
       if (candidate.capacity > candidate.cars.size())
-        avail.add(e.nextElement());
+        avail.add(candidate);
     }
     if (avail.size() > 0) {
       Random rand = new Random();
