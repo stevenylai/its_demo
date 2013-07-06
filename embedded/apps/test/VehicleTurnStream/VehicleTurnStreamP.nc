@@ -1,42 +1,39 @@
 #include <Timer.h>
 #include "Vehicle.h"
-#include "VehicleTurn.h"
+#include "VehicleSerial.h"
 
-module VehicleTurnP {
+module VehicleTurnStreamP {
   uses {
     interface Boot;
     interface Leds;
+
     interface Timer<TMilli> as Timer;
 
-    interface SplitControl as SerialControl;
     interface SplitControl as RadioControl;
+    interface SplitControl as SerialControl;
 
+    interface Packet as SerialPacket;
     interface Receive as SerialReceive;
     interface AMSend as SerialSend;
-    interface Packet as SerialPacket;
 
     interface Receive as RadioReceive;
   }
 } implementation {
-  uint8_t lasticnum;
-  uint8_t turnPoint;
+  uint8_t lasticnum, turnPoint;
   uint32_t delay;
   bool turned;
   message_t pkt;
 
   event void Boot.booted() {
-    lasticnum = 0;
-    turnPoint = 10;
-    //turnPoint = 8;
     delay = 0;
-    turned = FALSE;
+    lasticnum = turnPoint = 0;
     call RadioControl.start();
     call SerialControl.start();
   }
 
   event void RadioControl.startDone(error_t err) {}
-  event void SerialControl.startDone(error_t err) {}
   event void RadioControl.stopDone(error_t err) {}
+  event void SerialControl.startDone(error_t err) {}
   event void SerialControl.stopDone(error_t err) {}
 
   task void serialSendTask() {
@@ -78,7 +75,6 @@ module VehicleTurnP {
   event void Timer.fired() {
     post serialSendTask();
   }
-
   event message_t* RadioReceive.receive(message_t* msg, void* payload, uint8_t len){
     VehicleTurnMsg* vtm = (VehicleTurnMsg*)payload;
     if (len != sizeof(VehicleTurnMsg)) return msg;
