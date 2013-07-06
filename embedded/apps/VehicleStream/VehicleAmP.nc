@@ -67,7 +67,6 @@ module VehicleAmP {
   command error_t AMSend.send[am_id_t id](am_addr_t addr, message_t* msg, uint8_t len) {
     error_t returnErr;
     BaseToMoteMsg * btm;
-    call Leds.led0Toggle();
     if (id != AM_VEHICLE_SEND) {
       ignoredAm = id;
       ignoredMsg = msg;
@@ -112,7 +111,7 @@ module VehicleAmP {
         recvBufIdx = 0;
       }
       if (recvBufIdx < sizeof(vehicle_receive_t)) {
-        ((uint8_t *)&recvBufIdx)[recvBufIdx++] = byte;
+        ((uint8_t *)&recvBuf)[recvBufIdx++] = byte;
         if (recvBufIdx == sizeof(vehicle_receive_t)) {
           recvPayload->dir = recvBuf.dir;
           recvPayload->icnum = recvBuf.icnum;

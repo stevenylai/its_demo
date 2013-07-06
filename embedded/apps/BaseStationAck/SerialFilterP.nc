@@ -1,4 +1,4 @@
-#include "../../Vehicle/Vehicle.h"
+#include "Vehicle.h"
 
 module SerialFilterP {
   uses {
@@ -10,6 +10,7 @@ module SerialFilterP {
   }
 } implementation {
   event message_t *UartReceive.receive[am_id_t id](message_t *msg, void *payload, uint8_t len) {
+    /*
     bool filtered = FALSE;
 
     if (call AMPacket.type(msg) == AM_MOTETOBASEMSG) {
@@ -28,6 +29,8 @@ module SerialFilterP {
       return msg;
     else
       return signal UartFilteredReceive.receive[id](msg, payload, len);
+    */
+    return signal UartFilteredReceive.receive[id](msg, payload, len);
   }
   async event void ActiveMessageAddress.changed() {
   }
