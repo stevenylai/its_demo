@@ -3,6 +3,7 @@ module VehicleAmP {
   uses {
     interface UartStream;
     interface Packet as SerialPacket;
+    interface Leds;
   } provides {
     interface SplitControl;
     interface Receive[am_id_t id];
@@ -10,7 +11,7 @@ module VehicleAmP {
   }
 } implementation {
   vehicle_send_t sendBuf;
-  uint8_t* sendMsg;
+  message_t * sendMsg;
   error_t sendError;
 
   am_id_t ignoredAm;
@@ -20,11 +21,12 @@ module VehicleAmP {
   uint8_t recvBufIdx;
   message_t recvAm;
   message_t * recvAmPtr;
+  MoteToBaseMsg * recvPayload;
 
-  void startDoneTask() {
+  task void startDoneTask() {
     signal SplitControl.startDone(SUCCESS);
   }
-  void startDoneTask() {
+  task void stopDoneTask() {
     signal SplitControl.stopDone(SUCCESS);
   }
   command error_t SplitControl.start() {
@@ -33,9 +35,9 @@ module VehicleAmP {
       recvBuf.speed = 0;
 
       recvBufIdx = sizeof(vehicle_receive_t);
-      recvAmPtr = &recvAm;
+      recvPayload = (MoteToBaseMsg *)call SerialPacket.getPayload(recvAmPtr = &recvAm, sizeof(MoteToBaseMsg));
 
-      sendBuf.preemble = 0xFF; // Always fixed
+      sendBuf.preamble = 0xFF; // Always fixed
     }
     post startDoneTask();
     return SUCCESS;
@@ -44,36 +46,43 @@ module VehicleAmP {
     post stopDoneTask();
     return SUCCESS;
   }
-  void receiveMsgTask() {
-    recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg)), sizeof(MoteToBaseMsg));
+  task void receiveMsgTask() {
+    atomic {
+      recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg)), sizeof(MoteToBaseMsg));
+      recvPayload = (MoteToBaseMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg));
+    }
   }
-  void sendMsgDoneTask() {
-    uint8_t* tmpMsg;
+  task void sendMsgDoneTask() {
+    message_t * tmpMsg;
     error_t tmpError;
     atomic {
       tmpMsg = sendMsg;
       tmpError = sendError;
     }
-    signal AMSend.sendDone[AM_VEHICLE_SEND](tmpMsg, sendError);
+    signal AMSend.sendDone[AM_VEHICLE_SEND](tmpMsg, tmpError);
   }
-  void sendMsgIgnoredTask() {
+  task void sendMsgIgnoredTask() {
     signal AMSend.sendDone[ignoredAm](ignoredMsg, SUCCESS); 
   }
   command error_t AMSend.send[am_id_t id](am_addr_t addr, message_t* msg, uint8_t len) {
+    error_t returnErr;
+    BaseToMoteMsg * btm;
+    call Leds.led0Toggle();
     if (id != AM_VEHICLE_SEND) {
       ignoredAm = id;
       ignoredMsg = msg;
       post sendMsgIgnoredTask();
       return SUCCESS;
     }
-    BaseToMoteMsg * btm = (BaseToMoteMsg *)call SerialPacket.getPayload(msg, sizeof(BaseToMoteMsg));
+    btm = (BaseToMoteMsg *)call SerialPacket.getPayload(msg, sizeof(BaseToMoteMsg));
     atomic {
       sendBuf.id = recvBuf.id;
       sendError = SUCCESS;
-      if (cmd == 0x01) { // set speed
+      if (btm->cmd == 0x01) { // set speed
         sendBuf.speed = btm->data;
+        sendBuf.dir = 0;
         sendBuf.icnum = 0;
-      } else if (cmd == 0x02) { // set turn
+      } else if (btm->cmd == 0x02) { // set turn
         sendBuf.speed = (recvBuf.speed ? recvBuf.speed : VEHICLE_DEFAULT_SPEED);
         sendBuf.dir = btm->data >> 8;
         sendBuf.icnum = (uint8_t) (btm->data & 0xFF);
@@ -81,10 +90,11 @@ module VehicleAmP {
         sendError = FAIL;
       if (!sendError) {
         sendMsg = msg;
-        sendError = call UartStream.send(&sendBuf, sizeof(vehicle_send_t));
+        sendError = call UartStream.send((uint8_t *)&sendBuf, sizeof(vehicle_send_t));
       }
+      returnErr = sendError;
     }
-    return sendError;
+    return returnErr;
   }
   command error_t AMSend.cancel[am_id_t id](message_t* msg) {
     return FAIL;
@@ -98,16 +108,15 @@ module VehicleAmP {
 
   async event void UartStream.receivedByte( uint8_t byte ) {
     atomic {
-      if (byte == VEHICLE_PREEMBLE) {
+      if (byte == VEHICLE_PREAMBLE) {
         recvBufIdx = 0;
       }
       if (recvBufIdx < sizeof(vehicle_receive_t)) {
         ((uint8_t *)&recvBufIdx)[recvBufIdx++] = byte;
         if (recvBufIdx == sizeof(vehicle_receive_t)) {
-          MoteToBaseMsg * mtb = (MoteToBaseMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg));
-          mtb->dir = recvBuf.dir;
-          mtb->icnum = recvBuf.icnum;
-          mtb->speed = recvBuf.speed;
+          recvPayload->dir = recvBuf.dir;
+          recvPayload->icnum = recvBuf.icnum;
+          recvPayload->speed = recvBuf.speed;
           post receiveMsgTask();
         }
       } else {

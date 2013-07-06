@@ -1,4 +1,4 @@
-#include <Timer.h>
+//#include <Timer.h>
 #include "Vehicle.h"
 #include "VehicleSerial.h"
 
@@ -26,7 +26,9 @@ module VehicleTurnStreamP {
 
   event void Boot.booted() {
     delay = 0;
-    lasticnum = turnPoint = 0;
+    lasticnum = 0;
+    turnPoint = 12;
+    turned = FALSE;
     call RadioControl.start();
     call SerialControl.start();
   }
@@ -48,7 +50,8 @@ module VehicleTurnStreamP {
 
     lasticnum = mbm->icnum;
     if (mbm->icnum == turnPoint) {
-      call Leds.led0Toggle();
+      call Leds.led2Toggle();
+      //call Leds.led0Toggle();
       if (!turned) {
         BaseToMoteMsg* bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
         bmm->cmd = 0x02;
@@ -60,7 +63,7 @@ module VehicleTurnStreamP {
         turned = TRUE;
       }
     } else {
-      call Leds.led2Toggle();
+      call Leds.led1Toggle();
       turned = FALSE;
     }
     return msg;
