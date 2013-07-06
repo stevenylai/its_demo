@@ -79,7 +79,7 @@ configuration BaseStationC {
 }
 implementation {
   components MainC, BaseStationP, LedsC;
-  components ActiveMessageC as Radio, SerialFilterC as Serial;
+  components ActiveMessageC as Radio, SerialActiveMessageC as Serial;
   
   MainC.Boot <- BaseStationP;
 

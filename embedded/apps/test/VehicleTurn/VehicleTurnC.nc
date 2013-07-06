@@ -1,17 +1,16 @@
-#include <Timer.h>
 #include "Vehicle.h"
 #include "VehicleTurn.h"
 
 configuration VehicleTurnC {
 }
 implementation {
-  components MainC, LedsC, VehicleTurnP;
+  components MainC, VehicleTurnP;
   components new TimerMilliC() as Timer;
+  //components NoLedsC as LedsC;
+  components LedsC;
 
   components ActiveMessageC, SerialActiveMessageC;
-
-  components new SerialAMSenderC(AM_BASETOMOTEMSG) as SerialSend;
-  components new SerialAMReceiverC(AM_MOTETOBASEMSG) as SerialReceive;
+  components VehicleAmC;
   components new AMReceiverC(AM_VEHICLETURNMSG) as RadioReceive;
 
   VehicleTurnP.Boot -> MainC;
@@ -19,11 +18,11 @@ implementation {
   VehicleTurnP.Timer -> Timer;
 
   VehicleTurnP.RadioControl -> ActiveMessageC;
-  VehicleTurnP.SerialControl -> SerialActiveMessageC;
+  VehicleTurnP.SerialControl -> VehicleAmC;
 
-  VehicleTurnP.SerialSend -> SerialSend;
-  VehicleTurnP.SerialReceive -> SerialReceive;
-  VehicleTurnP.RadioReceive -> RadioReceive;
-
+  VehicleTurnP.SerialSend -> VehicleAmC.AMSend[AM_BASETOMOTEMSG];
+  VehicleTurnP.SerialReceive -> VehicleAmC.Receive[AM_MOTETOBASEMSG];
   VehicleTurnP.SerialPacket -> SerialActiveMessageC;
+
+  VehicleTurnP.RadioReceive -> RadioReceive;
 }

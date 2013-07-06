@@ -47,6 +47,7 @@ module VehicleAmP {
     return SUCCESS;
   }
   task void receiveMsgTask() {
+    call Leds.led0Toggle();
     atomic {
       recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg)), sizeof(MoteToBaseMsg));
       recvPayload = (MoteToBaseMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg));
