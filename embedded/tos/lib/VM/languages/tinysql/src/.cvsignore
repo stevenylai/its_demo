@@ -1,9 +1,0 @@
-Makefile
-Makefile.in
-*.cm*
-lex.ml
-parse.mli
-parse.ml
-tinysql
-tinysqlcc
-.deps

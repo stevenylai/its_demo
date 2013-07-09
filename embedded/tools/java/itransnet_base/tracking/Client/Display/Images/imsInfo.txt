@@ -1,4 +1,0 @@
-
-// imsInfo.txt images
-s 1.gif 8
-s 2.gif 8

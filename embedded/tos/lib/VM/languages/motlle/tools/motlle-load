@@ -1,3 +1,0 @@
-#!/bin/sh
-motlle=`ncc -print-tosdir`/lib/VM/languages/motlle
-motlle $motlle/src/mload.mt $motlle/src/ "$@"

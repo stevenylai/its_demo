@@ -1,9 +1,0 @@
-event System {
-	int id;
-}
-event SimpleEvent {
-	int id=System.id;
-} where {
-	id==1
-}
-subscribe SimpleEvent;
