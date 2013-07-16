@@ -21,7 +21,9 @@ module VehicleTurnP {
     NON_STOP,
     STOP_FIRST,
     TURNED,
-    MOVED
+    WAITED,
+    MOVED,
+    SLOW_DOWN_SPEED = 0x20
   } stopStatus;
 
   uint8_t lasticnum, turnPoint;
@@ -30,12 +32,12 @@ module VehicleTurnP {
   message_t pkt;
 
   event void Boot.booted() {
-    delay = 0;
+    delay = 5000;
     lasticnum = 0;
-    turnPoint = 12;
+    turnPoint = 9;
     turned = FALSE;
-    //stopStatus = NON_STOP;
-    stopStatus = STOP_FIRST;
+    stopStatus = NON_STOP;
+    //stopStatus = STOP_FIRST;
     call RadioControl.start();
     call SerialControl.start();
   }
@@ -62,15 +64,12 @@ module VehicleTurnP {
         BaseToMoteMsg* bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
         if (stopStatus == STOP_FIRST) { // Stop
           bmm->cmd = 0x01;
-          bmm->data = 0x00;
+          bmm->data = 0;
         } else { // Turn
           bmm->cmd = 0x02;
-          bmm->data = 0x01<<8|turnPoint;
+          bmm->data = 0x01<<8|(turnPoint+1);
         }
-        if (!delay)
-          post serialSendTask();
-        else
-          call Timer.startOneShot(delay);
+        post serialSendTask();
         turned = TRUE;
       }
     } else {
@@ -87,13 +86,20 @@ module VehicleTurnP {
     else if (stopStatus == STOP_FIRST) {
       bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
       bmm->cmd = 0x02;
-      bmm->data = 0x01<<8|turnPoint;
+      bmm->data = 0x01<<8|(turnPoint+1);
       stopStatus = TURNED;
       post serialSendTask();
-    } else if (stopStatus == STOP_FIRST) {
+    } else if (stopStatus == TURNED) {
+      if (delay)
+        call Timer.startOneShot(delay);
+      else {
+        stopStatus = WAITED;
+        post serialSendTask();
+      }
+    } else if (stopStatus == WAITED) {
       bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
       bmm->cmd = 0x01;
-      bmm->data = 0x01;
+      bmm->data = SLOW_DOWN_SPEED;
       stopStatus = MOVED;
       post serialSendTask();
     } else if (stopStatus == MOVED) {
@@ -103,6 +109,7 @@ module VehicleTurnP {
       call Leds.led1Toggle();
   }
   event void Timer.fired() {
+    stopStatus = WAITED;
     post serialSendTask();
   }
   event message_t* RadioReceive.receive(message_t* msg, void* payload, uint8_t len){
