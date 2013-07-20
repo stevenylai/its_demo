@@ -34,10 +34,10 @@ module VehicleTurnP {
   event void Boot.booted() {
     delay = 5000;
     lasticnum = 0;
-    turnPoint = 9;
+    turnPoint = 10;
     turned = FALSE;
-    stopStatus = NON_STOP;
-    //stopStatus = STOP_FIRST;
+    //stopStatus = NON_STOP;
+    stopStatus = STOP_FIRST;
     call RadioControl.start();
     call SerialControl.start();
   }
@@ -67,7 +67,7 @@ module VehicleTurnP {
           bmm->data = 0;
         } else { // Turn
           bmm->cmd = 0x02;
-          bmm->data = 0x01<<8|(turnPoint+1);
+          bmm->data = 0x01<<8|turnPoint;
         }
         post serialSendTask();
         turned = TRUE;
@@ -86,8 +86,9 @@ module VehicleTurnP {
     else if (stopStatus == STOP_FIRST) {
       bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
       bmm->cmd = 0x02;
-      bmm->data = 0x01<<8|(turnPoint+1);
-      stopStatus = TURNED;
+      bmm->data = 0x01<<8|turnPoint;
+      //stopStatus = TURNED;
+      stopStatus = STOP_FIRST;
       post serialSendTask();
     } else if (stopStatus == TURNED) {
       if (delay)
