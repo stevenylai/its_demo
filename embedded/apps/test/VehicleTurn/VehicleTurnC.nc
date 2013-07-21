@@ -20,8 +20,8 @@ implementation {
   VehicleTurnP.RadioControl -> ActiveMessageC;
   VehicleTurnP.SerialControl -> VehicleAmC;
 
-  VehicleTurnP.SerialSend -> VehicleAmC.AMSend[AM_BASETOMOTEMSG];
-  VehicleTurnP.SerialReceive -> VehicleAmC.Receive[AM_MOTETOBASEMSG];
+  VehicleTurnP.SerialSend -> VehicleAmC.AMSend[AM_VEHICLEMSG];
+  VehicleTurnP.SerialReceive -> VehicleAmC.Receive[AM_VEHICLEMSG];
   VehicleTurnP.SerialPacket -> SerialActiveMessageC;
 
   VehicleTurnP.RadioReceive -> RadioReceive;

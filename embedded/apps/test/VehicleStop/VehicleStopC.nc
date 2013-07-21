@@ -17,7 +17,7 @@ implementation {
 
   VehicleStopP.SerialControl -> VehicleAmC;
 
-  VehicleStopP.SerialSend -> VehicleAmC.AMSend[AM_BASETOMOTEMSG];
-  VehicleStopP.SerialReceive -> VehicleAmC.Receive[AM_MOTETOBASEMSG];
+  VehicleStopP.SerialSend -> VehicleAmC.AMSend[AM_VEHICLEMSG];
+  VehicleStopP.SerialReceive -> VehicleAmC.Receive[AM_VEHICLEMSG];
   VehicleStopP.SerialPacket -> SerialActiveMessageC;
 }

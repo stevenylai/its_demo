@@ -33,22 +33,23 @@ module VehicleStopP {
   event void SerialControl.stopDone(error_t err) {}
 
   task void serialSendTask() {
-    if (call SerialSend.send(0, &pkt, sizeof(BaseToMoteMsg)) != SUCCESS) {
+    if (call SerialSend.send(0, &pkt, sizeof(VehicleMsg)) != SUCCESS) {
       post serialSendTask();
     }
   }
   event message_t* SerialReceive.receive(message_t* msg, void* payload, uint8_t len){
-    MoteToBaseMsg * mbm = (MoteToBaseMsg *)payload;
-    if (len != sizeof(MoteToBaseMsg)) return msg;
-    if (lasticnum == mbm->icnum) return msg; // No change
+    VehicleMsg * vm = (VehicleMsg *)payload;
+    if (len != sizeof(VehicleMsg)) return msg;
+    if (lasticnum == vm->icnum) return msg; // No change
 
-    lasticnum = mbm->icnum;
-    if (mbm->icnum == turnPoint) {
+    lasticnum = vm->icnum;
+    if (vm->icnum == turnPoint) {
       call Leds.led0Toggle();
       if (!turned) {
-        BaseToMoteMsg* bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
-        bmm->cmd = 0x01;
-        bmm->data = 0;
+        VehicleMsg* reply = (VehicleMsg*)call SerialPacket.getPayload(&pkt, sizeof(VehicleMsg));
+        reply->icnum = vm->icnum;
+        reply->speed = 0;
+        reply->dir = 0;
         post serialSendTask();
         call Timer.startOneShot(delay);
         turned = TRUE;
@@ -67,9 +68,9 @@ module VehicleStopP {
       call Leds.led1Toggle();
   }
   event void Timer.fired() {
-    BaseToMoteMsg* bmm = (BaseToMoteMsg*)call SerialPacket.getPayload(&pkt, sizeof(BaseToMoteMsg));
-    bmm->cmd = 0x01;
-    bmm->data = 0x20;
+    VehicleMsg* reply = (VehicleMsg*)call SerialPacket.getPayload(&pkt, sizeof(VehicleMsg));
+    reply->speed = 0x10;
+    reply->dir = 0;
     post serialSendTask();
   }
 }

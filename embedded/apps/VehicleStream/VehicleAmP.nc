@@ -21,7 +21,7 @@ module VehicleAmP {
   uint8_t recvBufIdx;
   message_t recvAm;
   message_t * recvAmPtr;
-  MoteToBaseMsg * recvPayload;
+  VehicleMsg * recvPayload;
 
   task void startDoneTask() {
     signal SplitControl.startDone(SUCCESS);
@@ -35,7 +35,7 @@ module VehicleAmP {
       recvBuf.speed = 0;
 
       recvBufIdx = sizeof(vehicle_receive_t);
-      recvPayload = (MoteToBaseMsg *)call SerialPacket.getPayload(recvAmPtr = &recvAm, sizeof(MoteToBaseMsg));
+      recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr = &recvAm, sizeof(VehicleMsg));
 
       sendBuf.preamble = 0xFF; // Always fixed
     }
@@ -49,8 +49,8 @@ module VehicleAmP {
   task void receiveMsgTask() {
     call Leds.led0Toggle();
     atomic {
-      recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg)), sizeof(MoteToBaseMsg));
-      recvPayload = (MoteToBaseMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(MoteToBaseMsg));
+      recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg)), sizeof(VehicleMsg));
+      recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg));
     }
   }
   task void sendMsgDoneTask() {
@@ -67,31 +67,21 @@ module VehicleAmP {
   }
   command error_t AMSend.send[am_id_t id](am_addr_t addr, message_t* msg, uint8_t len) {
     error_t returnErr;
-    BaseToMoteMsg * btm;
+    VehicleMsg * vm;
     if (id != AM_VEHICLE_SEND) {
       ignoredAm = id;
       ignoredMsg = msg;
       post sendMsgIgnoredTask();
       return SUCCESS;
     }
-    btm = (BaseToMoteMsg *)call SerialPacket.getPayload(msg, sizeof(BaseToMoteMsg));
+    vm = (VehicleMsg *)call SerialPacket.getPayload(msg, sizeof(VehicleMsg));
     atomic {
       sendBuf.id = recvBuf.id;
-      sendError = SUCCESS;
-      if (btm->cmd == 0x01) { // set speed
-        sendBuf.speed = btm->data;
-        sendBuf.dir = 0;
-        sendBuf.icnum = 0;
-      } else if (btm->cmd == 0x02) { // set turn
-        sendBuf.speed = (recvBuf.speed ? recvBuf.speed : VEHICLE_DEFAULT_SPEED);
-        sendBuf.dir = btm->data >> 8;
-        sendBuf.icnum = (uint8_t) (btm->data & 0xFF);
-      } else  // Unknown command
-        sendError = FAIL;
-      if (!sendError) {
-        sendMsg = msg;
-        sendError = call UartStream.send((uint8_t *)&sendBuf, sizeof(vehicle_send_t));
-      }
+      sendBuf.speed = (uint8_t)vm->speed;
+      sendBuf.dir = vm->dir;
+      sendBuf.icnum = vm->icnum;
+      sendMsg = msg;
+      sendError = call UartStream.send((uint8_t *)&sendBuf, sizeof(vehicle_send_t));
       returnErr = sendError;
     }
     return returnErr;
