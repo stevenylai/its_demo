@@ -23,11 +23,11 @@ public class TestMap implements ITSSender {
       }
     }
   }
-  public void setSpeed(int id, int speed) {
-    System.out.println("Setting speed of car : "+Integer.toString(id)+" to: "+Integer.toString(speed));
+  public void setSpeed(Car car, int speed) {
+    System.out.println("Setting speed of car : "+Integer.toString(car.id)+" to: "+Integer.toString(speed));
   }
-  public void setDir(int id, int dir) {
-    System.out.println("Setting dir of car : "+Integer.toString(id)+" to: "+Map.getDirString(dir));
+  public void setDir(Car car, int dir) {
+    System.out.println("Setting dir of car : "+Integer.toString(car.id)+" to: "+Map.getDirString(dir));
   }
   public static void main(String[] args) throws Exception {
     TestMap tester = new TestMap();

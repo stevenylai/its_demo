@@ -1,3 +1,3 @@
 COMPONENT=BaseStationC
-CFLAGS+=-I../Vehicle
+#CFLAGS+=-I../Vehicle
 include $(MAKERULES)

@@ -8,7 +8,7 @@ configuration VehicleAmC {
     interface AMSend[am_id_t id];
   }
 } implementation {
-  components VehicleAmP, SerialActiveMessageC as Serial, PlatformSerialC;
+  components VehicleAmP, SerialActiveMessageC as Serial, ActiveMessageAddressC, PlatformSerialC;
   components SerialStartC;
   //components LedsC;
   components NoLedsC as LedsC;
@@ -24,4 +24,6 @@ configuration VehicleAmC {
   VehicleAmP.Leds -> LedsC;
   VehicleAmP.UartStream -> PlatformSerialC;
   VehicleAmP.SerialPacket -> Serial;
+  VehicleAmP.SerialAMPacket -> Serial;
+  VehicleAmP.ActiveMessageAddress -> ActiveMessageAddressC;
 }

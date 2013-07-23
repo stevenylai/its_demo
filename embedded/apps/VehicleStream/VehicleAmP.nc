@@ -3,6 +3,8 @@ module VehicleAmP {
   uses {
     interface UartStream;
     interface Packet as SerialPacket;
+    interface AMPacket as SerialAMPacket;
+    interface ActiveMessageAddress;
     interface Leds;
   } provides {
     interface SplitControl;
@@ -49,6 +51,8 @@ module VehicleAmP {
   task void receiveMsgTask() {
     call Leds.led0Toggle();
     atomic {
+      call SerialAMPacket.setSource(recvAmPtr, call ActiveMessageAddress.amAddress());
+      call SerialAMPacket.setDestination(recvAmPtr, 0);
       recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg)), sizeof(VehicleMsg));
       recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg));
     }
@@ -120,6 +124,7 @@ module VehicleAmP {
   }
   async event void UartStream.receiveDone( uint8_t* buf, uint16_t len, error_t error ) {
   }
+  async event void ActiveMessageAddress.changed() {}
 
   default event message_t* Receive.receive[am_id_t id](message_t* msg, void* payload, uint8_t len) {
     return msg;

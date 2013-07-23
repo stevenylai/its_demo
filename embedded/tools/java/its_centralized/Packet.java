@@ -12,11 +12,11 @@ public class Packet implements MessageListener, ITSSender {
   
   public Packet(MoteIF moteIF) {
     this.moteIF = moteIF;
-    this.moteIF.registerListener(new MoteToBaseMsg(), this);
+    this.moteIF.registerListener(new VehicleMsg(), this);
     this.msgListeners = new ArrayList<ITSReceiver>();
   }
 
-  private void sendPacket(int id, BaseToMoteMsg cmd) {
+  private void sendPacket(int id, VehicleMsg cmd) {
     boolean success = false;
     while (!success) {
       try {
@@ -28,24 +28,26 @@ public class Packet implements MessageListener, ITSSender {
       }
     }
   }
-  public void setSpeed(int id, int speed) {
-    BaseToMoteMsg cmd = new BaseToMoteMsg();
-    cmd.set_cmd((short)0x01);
-    cmd.set_data(speed);
-    sendPacket(id, cmd);
+  public void setSpeed(Car car, int speed) {
+    VehicleMsg cmd = new VehicleMsg();
+    cmd.set_dir((short)0x00);
+    cmd.set_speed((short)speed);
+    cmd.set_icnum((short)(car.getCurrentIC()-1)); // Disable the dir
+    sendPacket(car.id, cmd);
   }
-  public void setDir(int id, int dir) {
-    BaseToMoteMsg cmd = new BaseToMoteMsg();
-    cmd.set_cmd((short)0x02);
-    cmd.set_data(dir);
-    sendPacket(id, cmd);
+  public void setDir(Car car, int dir) {
+    VehicleMsg cmd = new VehicleMsg();
+    cmd.set_dir((short)dir);
+    cmd.set_speed((short)0x10);
+    cmd.set_icnum((short)car.getCurrentIC());
+    sendPacket(car.id, cmd);
   }
 
   public void addITSListener (ITSReceiver receiver) {
     this.msgListeners.add(receiver);
   }
   public void messageReceived(int to, Message message) {
-    MoteToBaseMsg msg = (MoteToBaseMsg)message;
+    VehicleMsg msg = (VehicleMsg)message;
     SerialPacket serialMsg = message.getSerialPacket();
     //System.out.println("Received packet " + msg + " Serial packet " + serialMsg);
     for (ITSReceiver receiver : this.msgListeners) {

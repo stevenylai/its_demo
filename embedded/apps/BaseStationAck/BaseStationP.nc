@@ -291,7 +291,7 @@ implementation
     call RadioAMPacket.setSource(msg, source);
     
     call RadioAck.requestAck(msg);
-    if (call RadioSend.send[id](TOS_NODE_ID?0:addr, msg, len) == SUCCESS)
+    if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
       call Leds.led0Toggle();
     else
       {

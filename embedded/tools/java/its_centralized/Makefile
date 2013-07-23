@@ -2,7 +2,7 @@ JAVAC = javac
 MIG = mig
 VEHICLE_DIR = ../../../apps/Vehicle
 JAVA_CLASSES = $(patsubst %.java,%.class,$(wildcard *.java))
-MESSAGES = MoteToBaseMsg BaseToMoteMsg
+MESSAGES = VehicleMsg
 
 all: $(addsuffix .class,$(MESSAGES)) $(JAVA_CLASSES)
 clean:

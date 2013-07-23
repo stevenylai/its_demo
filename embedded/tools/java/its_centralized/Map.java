@@ -73,13 +73,13 @@ class Map implements ITSReceiver{
   private void stopCar (Car car) {
     if (!car.stopped) {
       car.stopped = true;
-      sender.setSpeed(car.id, 0);
+      sender.setSpeed(car, 0);
     }
   }
   private void startCar (Car car) {
     if (car.stopped) {
       car.stopped = false;
-      sender.setSpeed(car.id, car.speed);
+      sender.setSpeed(car, car.speed);
     }
   }
   private void turnCar (Car car, Road road) {
@@ -87,9 +87,9 @@ class Map implements ITSReceiver{
       Integer turn = e.nextElement();
       if (car.belongs.exitRoads.get(turn) == road) {
         if (turn.intValue() == 1) // 1: straight - no need to turn
-          sender.setDir(car.id, 0<<8|car.getCurrentIC());
+          sender.setDir(car, 0);
         else
-          sender.setDir(car.id, 1<<8|car.getCurrentIC());
+          sender.setDir(car, 1);
      
       }
     }
