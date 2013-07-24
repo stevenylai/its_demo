@@ -53,6 +53,9 @@ module VehicleAmP {
     atomic {
       call SerialAMPacket.setSource(recvAmPtr, call ActiveMessageAddress.amAddress());
       call SerialAMPacket.setDestination(recvAmPtr, 0);
+      call SerialAMPacket.setType(recvAmPtr, AM_VEHICLE_RECEIVE);
+      call SerialAMPacket.setGroup(recvAmPtr, call SerialAMPacket.localGroup());
+      call SerialPacket.setPayloadLength(recvAmPtr, sizeof(VehicleMsg));
       recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg)), sizeof(VehicleMsg));
       recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg));
     }

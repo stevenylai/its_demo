@@ -134,11 +134,13 @@ implementation {
         } else {
 	        call Leds.led1Off();
         }
-        if (counter & 0x4) {
+        /*if (counter & 0x4) {
 	        call Leds.led2On();
         } else {
 	        call Leds.led2Off();
-        }
+        }*/
+      } else {
+        call Leds.led2Toggle();
       }
     }
   }
