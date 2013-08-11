@@ -5,6 +5,7 @@ class Map implements ITSReceiver{
   public Dictionary <Integer, Car> cars;
   public Dictionary <Integer, Road> startRoads;
   public Dictionary <Integer, Road> endRoads;
+  public CarKeeper keeper;
   public ITSSender sender;
 
   static public String getDirString (int dir) {
@@ -68,6 +69,7 @@ class Map implements ITSReceiver{
     this.cars = new Hashtable <Integer, Car> ();
     this.startRoads = new Hashtable <Integer, Road> ();
     this.endRoads = new Hashtable <Integer, Road> ();
+    this.keeper = new CarKeeper();
     this.constructMap();
   }
   private void stopCar (Car car) {
@@ -154,6 +156,7 @@ class Map implements ITSReceiver{
       car.status = (start==null?Car.LEAVING:car.ENTERING);
       this.cars.put(new Integer(car.id), car);
     } else if (stateIsUnchanged(car, start, end)) {
+      car.freshness = new Date();
       //System.out.println("Status is unchanged: " + car.toString());
       // Do nothing for now (may need to adjust speed later on)
       return;
@@ -165,10 +168,11 @@ class Map implements ITSReceiver{
         car.switchTo(end);
         car.status = Car.LEAVING;
       }
-      System.out.println("Car: " + car);
+      System.out.println(car);
     }
     this.checkCar(car);
     this.checkStoppedCars();
+    this.keeper.checkInactiveCar(this.cars);
   }
   // For testing if the roads are constructed and connected correctly
   public static void main(String[] args) throws Exception {

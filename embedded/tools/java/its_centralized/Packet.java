@@ -88,6 +88,7 @@ public class Packet implements MessageListener, ITSSender {
     comm.addITSListener(its_map);
 
     while (true) {
+      Thread.sleep(2000);
       Thread.yield();
     }
   }
