@@ -11,6 +11,17 @@ public class TestMap implements ITSSender {
     this.msgs.add(new int[]{1, 1, 7, 5});
     this.msgs.add(new int[]{1, 1, 8, 5});
     this.msgs.add(new int[]{2, 1, 75, 5});
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {}
+    // Collision avoidance
+    this.msgs.add(new int[]{1, 1, 9, 5});
+    this.msgs.add(new int[]{2, 1, 9, 5});
+    this.msgs.add(new int[]{1, 1, 10, 5});
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {}
+    this.msgs.add(new int[]{2, 1, 10, 5});
   }
   public void addITSListener (ITSReceiver receiver) {
     this.msgListeners.add(receiver);

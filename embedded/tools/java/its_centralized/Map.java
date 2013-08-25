@@ -5,8 +5,10 @@ class Map implements ITSReceiver{
   public Dictionary <Integer, Car> cars;
   public Dictionary <Integer, Road> startRoads;
   public Dictionary <Integer, Road> endRoads;
+  public MessageDispatcher dispatcher;
   public CarKeeper keeper;
   public ITSSender sender;
+  public static final int SAFE_EXIT_INTERVAL = 1000;
 
   static public String getDirString (int dir) {
     switch (dir) {
@@ -70,6 +72,9 @@ class Map implements ITSReceiver{
     this.startRoads = new Hashtable <Integer, Road> ();
     this.endRoads = new Hashtable <Integer, Road> ();
     this.keeper = new CarKeeper();
+    this.dispatcher = new MessageDispatcher(this);
+    Thread dispatcherThread = new Thread(this.dispatcher);
+    dispatcherThread.start();
     this.constructMap();
   }
   private void stopCar (Car car) {
@@ -78,13 +83,13 @@ class Map implements ITSReceiver{
       sender.setSpeed(car, 0);
     }
   }
-  private void startCar (Car car) {
+  public void startCar (Car car) {
     if (car.stopped) {
       car.stopped = false;
       sender.setSpeed(car, car.speed);
     }
   }
-  private void turnCar (Car car, Road road) {
+  public void turnCar (Car car, Road road) {
     for (Enumeration<Integer> e = car.belongs.exitRoads.keys(); e.hasMoreElements();) {
       Integer turn = e.nextElement();
       if (car.belongs.exitRoads.get(turn) == road) {
@@ -99,40 +104,63 @@ class Map implements ITSReceiver{
   private void checkStoppedCars() {
     for (Enumeration<Car> e = this.cars.elements(); e.hasMoreElements();) {
       Car car = e.nextElement();
-      if (!car.stopped)
+      if (!car.stopped || this.dispatcher.hasCar(car))
          continue;
       this.checkCar(car);
     }
   }
+  private void printIntersectionCars(CrossRoad cross) {
+    for (Car car : cross.waiting) {
+      System.out.print(car.id + " ");
+    }
+  }
   private void checkCar (Car car) {
     boolean tryToStartCar = false;
+    Date current = new Date();
     if (car.status == Car.LEAVING) {
       if (car.belongs.cross != null) {
-        // 1. Collision avoidance
+        // Collision avoidance
 	      if (!car.belongs.cross.waiting.contains(car) ) {
 	        car.belongs.cross.waiting.add(car);
 	      }
-        if (car.belongs.cross.waiting.size() > 1 && !car.stopped) {
-	        System.out.println(car.toString() + " is stopped to avoid collision");
-          this.stopCar(car);
+        if (car.belongs.cross.waiting.size() > 1) {
+          if (!car.stopped) {
+            this.stopCar(car);
+	          System.out.print(car.toString() + " is stopped to avoid collision, intersection wait queue: ");
+          } else {
+	          System.out.print(car.toString() + " cannot start because intersection is still busy: ");
+          }
+          this.printIntersectionCars(car.belongs.cross);
+          System.out.println("");
         } else if (car.belongs.cross.waiting.size() <= 1 && car.stopped) {
 	        System.out.println(car.toString() + " is no longer in collision state, trying to start it ...");
           tryToStartCar = true;
-	      }
+        }
       }
       if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
         Road exit = car.belongs.chooseExit();
         if (exit == null) { // All exit roads are full, stop the car
 	        System.out.println(car.toString() + " is stopped because there is no exit available");
           this.stopCar(car);
+	      } else if (current.getTime() - exit.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
+          System.out.println(car.toString() + " is running too close to the previous car. Trying to pause it");
+          this.stopCar(car);
+          this.dispatcher.addCar(car, current, exit);
         } else {
 	        System.out.println(car.toString() + " is instructed to switch to " + exit.toString());
-          this.startCar(car);
-          this.turnCar(car, exit);
+          if (car.stopped) {
+            this.startCar(car);
+            this.turnCar(car, exit);
+            exit.lastExit = current;
+            //this.dispatcher.addCar(car, current, exit);
+          } else {
+            this.startCar(car);
+            this.turnCar(car, exit);
+            exit.lastExit = current;
+          }
 	      }
       }
     } else {
-      // Not doing anything for now but we may need to adjust the car's speed here in the future
     }
   }
   private boolean stateIsUnchanged (Car car, Road in, Road out) {
@@ -157,10 +185,9 @@ class Map implements ITSReceiver{
       this.cars.put(new Integer(car.id), car);
     } else if (stateIsUnchanged(car, start, end)) {
       car.freshness = new Date();
-      //System.out.println("Status is unchanged: " + car.toString());
-      // Do nothing for now (may need to adjust speed later on)
       return;
     } else {
+      this.dispatcher.removeCar(car);
       if (start != null) { // Entering a new road
         car.switchTo(start);
         car.status = Car.ENTERING;
@@ -172,7 +199,7 @@ class Map implements ITSReceiver{
     }
     this.checkCar(car);
     this.checkStoppedCars();
-    this.keeper.checkInactiveCar(this.cars);
+    this.keeper.checkInactiveCar(this.cars, this.dispatcher);
   }
   // For testing if the roads are constructed and connected correctly
   public static void main(String[] args) throws Exception {

@@ -1,9 +1,11 @@
 import java.util.*;
 
 class Road {
+  public static final int safeExitInterval = 1000;
   public int startIC;
   public int endIC;
   public int capacity;
+  public Date lastExit;
   public List <Car> cars;
   public Dictionary <Integer, Road> exitRoads;
   public CrossRoad cross;
@@ -11,6 +13,7 @@ class Road {
     this.startIC = startIC;
     this.endIC = endIC;
     this.capacity = capacity;
+    this.lastExit = new Date();
     this.cars = new ArrayList<Car>();
     this.exitRoads = new Hashtable <Integer, Road>();
   }
