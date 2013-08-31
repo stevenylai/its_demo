@@ -22,7 +22,7 @@ class Road {
     for (Enumeration<Road> e = this.exitRoads.elements(); e.hasMoreElements();) {
       Road candidate = e.nextElement();
       if (candidate.capacity > candidate.cars.size()) {
-        //System.out.println("Capacity of " + this + ": " + candidate.capacity + ", currently used: " + candidate.cars.size());
+        //System.out.println("Capacity of " + candidate + ": " + candidate.capacity + ", currently used: " + candidate.cars.size() + ": " + candidate.cars);
         avail.add(candidate);
       }
     }

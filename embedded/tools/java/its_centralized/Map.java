@@ -8,7 +8,7 @@ class Map implements ITSReceiver{
   public MessageDispatcher dispatcher;
   public CarKeeper keeper;
   public ITSSender sender;
-  public static final int SAFE_EXIT_INTERVAL = 1000;
+  public static final int SAFE_EXIT_INTERVAL = 2000;
 
   static public String getDirString (int dir) {
     switch (dir) {
@@ -123,7 +123,7 @@ class Map implements ITSReceiver{
 	      if (!car.belongs.cross.waiting.contains(car) ) {
 	        car.belongs.cross.waiting.add(car);
 	      }
-        if (car.belongs.cross.waiting.size() > 1) {
+        if (car.belongs.cross.waiting.get(0) != car && car.belongs.cross.waiting.size() > 1) {
           if (!car.stopped) {
             this.stopCar(car);
 	          System.out.print(car.toString() + " is stopped to avoid collision, intersection wait queue: ");
@@ -132,13 +132,15 @@ class Map implements ITSReceiver{
           }
           this.printIntersectionCars(car.belongs.cross);
           System.out.println("");
-        } else if (car.belongs.cross.waiting.size() <= 1 && car.stopped) {
+        } else if ((car.belongs.cross.waiting.get(0) == car || car.belongs.cross.waiting.size() <= 1) && car.stopped) {
 	        System.out.println(car.toString() + " is no longer in collision state, trying to start it ...");
           tryToStartCar = true;
         }
       }
       if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
         Road exit = car.belongs.chooseExit();
+        if (exit != null)
+          System.out.println("Exit road at: " + current + ", previous exit time: " + exit.lastExit);
         if (exit == null) { // All exit roads are full, stop the car
 	        System.out.println(car.toString() + " is stopped because there is no exit available");
           this.stopCar(car);
@@ -179,10 +181,15 @@ class Map implements ITSReceiver{
     if (start == null) {
       end = this.endRoads.get(new Integer(pos));
     }
+    if (start == null && end == null) {
+      System.out.println("Cannot find the car with pos: " + pos);
+      return;
+    }
     if (car == null) {
       car = new Car(carID, start==null?end:start);
       car.status = (start==null?Car.LEAVING:car.ENTERING);
       this.cars.put(new Integer(car.id), car);
+      car.switchTo(start==null?end:start);
     } else if (stateIsUnchanged(car, start, end)) {
       car.freshness = new Date();
       return;

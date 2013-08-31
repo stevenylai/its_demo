@@ -7,6 +7,30 @@ public class TestMap implements ITSSender {
   public TestMap () {
     this.msgListeners = new ArrayList<ITSReceiver>();
     this.msgs = new ArrayList<int[]>();
+    // Collision avoidance
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {}
+    this.msgs.add(new int[]{1, 1, 61, 5});
+    this.msgs.add(new int[]{2, 1, 61, 5});
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {}
+    this.msgs.add(new int[]{1, 1, 57, 5});
+    this.msgs.add(new int[]{2, 1, 83, 5});
+    this.msgs.add(new int[]{3, 1, 83, 5});
+    this.msgs.add(new int[]{4, 1, 53, 5});
+    this.msgs.add(new int[]{4, 1, 55, 5});
+    this.msgs.add(new int[]{5, 1, 82, 5});
+    this.msgs.add(new int[]{1, 1, 59, 5});
+    this.msgs.add(new int[]{1, 1, 61, 5});
+    /*
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {}
+    this.msgs.add(new int[]{1, 1, 63, 5});
+    this.msgs.add(new int[]{2, 1, 63, 5});
+
     this.msgs.add(new int[]{1, 1, 6, 5});
     this.msgs.add(new int[]{1, 1, 7, 5});
     this.msgs.add(new int[]{1, 1, 8, 5});
@@ -22,6 +46,7 @@ public class TestMap implements ITSSender {
       Thread.sleep(1000);
     } catch (InterruptedException e) {}
     this.msgs.add(new int[]{2, 1, 10, 5});
+    */
   }
   public void addITSListener (ITSReceiver receiver) {
     this.msgListeners.add(receiver);
