@@ -84,6 +84,7 @@ implementation
   enum {
     UART_QUEUE_LEN = 12,
     RADIO_QUEUE_LEN = 12,
+    MAX_RETRIAL = 128,
   };
 
   message_t  uartQueueBufs[UART_QUEUE_LEN];
@@ -95,6 +96,8 @@ implementation
   message_t  * ONE_NOK radioQueue[RADIO_QUEUE_LEN];
   uint8_t    radioIn, radioOut;
   bool       radioBusy, radioFull;
+  
+  uint8_t    retrialCount;
 
   task void uartSendTask();
   task void radioSendTask();
@@ -126,6 +129,7 @@ implementation
       radioFull = FALSE;
     if (call SerialControl.start() == EALREADY)
       uartFull = FALSE;
+    retrialCount = 0;
   }
 
   event void RadioControl.startDone(error_t error) {
@@ -301,17 +305,21 @@ implementation
   }
 
   event void RadioSend.sendDone[am_id_t id](message_t* msg, error_t error) {
-    if (error != SUCCESS || !(call RadioAck.wasAcked(msg)))
+    if (error != SUCCESS)
       failBlink();
-    else {
-      atomic
-	if (msg == radioQueue[radioOut])
-	  {
-	    if (++radioOut >= RADIO_QUEUE_LEN)
-	      radioOut = 0;
-	    if (radioFull)
-	      radioFull = FALSE;
-	  }
+    else if (!(call RadioAck.wasAcked(msg)) && retrialCount < MAX_RETRIAL) {
+      failBlink();
+      atomic retrialCount++;
+    } else {
+      atomic {
+	      if (msg == radioQueue[radioOut]) {
+	        if (++radioOut >= RADIO_QUEUE_LEN)
+	          radioOut = 0;
+	        if (radioFull)
+	          radioFull = FALSE;
+	      }
+        retrialCount = 0;
+      }
     }
     
     post radioSendTask();

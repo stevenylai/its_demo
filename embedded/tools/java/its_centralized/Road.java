@@ -1,7 +1,6 @@
 import java.util.*;
 
 class Road {
-  public static final int safeExitInterval = 1000;
   public int startIC;
   public int endIC;
   public int capacity;

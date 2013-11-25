@@ -1,29 +1,30 @@
 #include "VehicleSerial.h"
 module VehicleAmP {
   uses {
-    interface UartStream;
     interface Packet as SerialPacket;
     interface AMPacket as SerialAMPacket;
     interface ActiveMessageAddress;
     interface Leds;
+    interface Timer<TMilli> as Timer;
   } provides {
     interface SplitControl;
     interface Receive[am_id_t id];
     interface AMSend[am_id_t id];
   }
 } implementation {
-  vehicle_send_t sendBuf;
   message_t * sendMsg;
-  error_t sendError;
 
   am_id_t ignoredAm;
   message_t * ignoredMsg;
 
-  vehicle_receive_t recvBuf;
-  uint8_t recvBufIdx;
   message_t recvAm;
   message_t * recvAmPtr;
   VehicleMsg * recvPayload;
+
+  /*message_t serial_msg_queue[QUEUE_LEN];
+  uint8_t serial_queue_head, serial_queue_tail;
+  bool carStopped, sendingBeacon;
+  */
 
   task void startDoneTask() {
     signal SplitControl.startDone(SUCCESS);
@@ -33,13 +34,8 @@ module VehicleAmP {
   }
   command error_t SplitControl.start() {
     atomic {
-      recvBuf.id = TOS_NODE_ID;
-      recvBuf.speed = 0;
-
-      recvBufIdx = sizeof(vehicle_receive_t);
       recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr = &recvAm, sizeof(VehicleMsg));
-
-      sendBuf.preamble = 0xFF; // Always fixed
+      //carStopped = sendingBeacon = false;
     }
     post startDoneTask();
     return SUCCESS;
@@ -88,7 +84,6 @@ module VehicleAmP {
       sendBuf.dir = vm->dir;
       sendBuf.icnum = vm->icnum;
       sendMsg = msg;
-      sendError = call UartStream.send((uint8_t *)&sendBuf, sizeof(vehicle_send_t));
       returnErr = sendError;
     }
     return returnErr;
@@ -102,30 +97,9 @@ module VehicleAmP {
   command void* AMSend.getPayload[am_id_t id](message_t* msg, uint8_t len) {
     return call SerialPacket.getPayload(msg, len);
   }
-
-  async event void UartStream.receivedByte( uint8_t byte ) {
+  event void Timer.fired() {
     atomic {
-      if (byte == VEHICLE_PREAMBLE) {
-        recvBufIdx = 0;
-      }
-      if (recvBufIdx < sizeof(vehicle_receive_t)) {
-        ((uint8_t *)&recvBuf)[recvBufIdx++] = byte;
-        if (recvBufIdx == sizeof(vehicle_receive_t)) {
-          recvPayload->dir = recvBuf.dir;
-          recvPayload->icnum = recvBuf.icnum;
-          recvPayload->speed = recvBuf.speed;
-          post receiveMsgTask();
-        }
-      } else {
-        // Ignored
-      }
     }
-  }
-  async event void UartStream.sendDone( uint8_t* buf, uint16_t len, error_t error ) {
-    atomic sendError = error;
-    post sendMsgDoneTask();
-  }
-  async event void UartStream.receiveDone( uint8_t* buf, uint16_t len, error_t error ) {
   }
   async event void ActiveMessageAddress.changed() {}
 

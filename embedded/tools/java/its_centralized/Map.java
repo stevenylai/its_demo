@@ -8,7 +8,7 @@ class Map implements ITSReceiver{
   public MessageDispatcher dispatcher;
   public CarKeeper keeper;
   public ITSSender sender;
-  public static final int SAFE_EXIT_INTERVAL = 2000;
+  public static final int SAFE_EXIT_INTERVAL = 4000;
 
   static public String getDirString (int dir) {
     switch (dir) {

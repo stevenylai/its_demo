@@ -24,7 +24,7 @@ module VehicleStopP {
   event void Boot.booted() {
     delay = 5000;
     lasticnum = 0;
-    turnPoint = 10;
+    turnPoint = 63;
     turned = FALSE;
     call SerialControl.start();
   }

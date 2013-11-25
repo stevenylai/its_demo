@@ -22,7 +22,6 @@ configuration VehicleAmC {
   AMPacket = Serial;
 
   VehicleAmP.Leds -> LedsC;
-  VehicleAmP.UartStream -> PlatformSerialC;
   VehicleAmP.SerialPacket -> Serial;
   VehicleAmP.SerialAMPacket -> Serial;
   VehicleAmP.ActiveMessageAddress -> ActiveMessageAddressC;
