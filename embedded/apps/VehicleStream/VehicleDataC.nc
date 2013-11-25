@@ -6,6 +6,7 @@ configuration VehicleDataC {
 } implementation {
   components VehicleDataP, SerialActiveMessageC as Serial, PlatformSerialC;
   components LedsC;
+  //components NoLedsC as LedsC;
 
   SplitControl = VehicleDataP;
   SplitControl = Serial;

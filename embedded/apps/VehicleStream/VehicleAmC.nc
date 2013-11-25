@@ -8,12 +8,14 @@ configuration VehicleAmC {
     interface AMSend[am_id_t id];
   }
 } implementation {
-  components VehicleAmP, SerialActiveMessageC as Serial, ActiveMessageAddressC, PlatformSerialC;
+  components VehicleAmP, ActiveMessageAddressC, SerialActiveMessageC as Serial;
   components SerialStartC;
+  components VehicleDataC;
   //components LedsC;
   components NoLedsC as LedsC;
 
   SplitControl = VehicleAmP;
+  SplitControl = VehicleDataC;
   SplitControl = Serial;
   Receive = VehicleAmP;
   AMSend = VehicleAmP;
@@ -25,4 +27,5 @@ configuration VehicleAmC {
   VehicleAmP.SerialPacket -> Serial;
   VehicleAmP.SerialAMPacket -> Serial;
   VehicleAmP.ActiveMessageAddress -> ActiveMessageAddressC;
+  VehicleAmP.VehicleData -> VehicleDataC;
 }

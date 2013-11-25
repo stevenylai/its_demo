@@ -4,8 +4,8 @@ module VehicleAmP {
     interface Packet as SerialPacket;
     interface AMPacket as SerialAMPacket;
     interface ActiveMessageAddress;
+    interface VehicleData;
     interface Leds;
-    interface Timer<TMilli> as Timer;
   } provides {
     interface SplitControl;
     interface Receive[am_id_t id];
@@ -13,6 +13,8 @@ module VehicleAmP {
   }
 } implementation {
   message_t * sendMsg;
+  VehicleMsg sendBuf;
+  bool sending;
 
   am_id_t ignoredAm;
   message_t * ignoredMsg;
@@ -21,11 +23,6 @@ module VehicleAmP {
   message_t * recvAmPtr;
   VehicleMsg * recvPayload;
 
-  /*message_t serial_msg_queue[QUEUE_LEN];
-  uint8_t serial_queue_head, serial_queue_tail;
-  bool carStopped, sendingBeacon;
-  */
-
   task void startDoneTask() {
     signal SplitControl.startDone(SUCCESS);
   }
@@ -33,10 +30,9 @@ module VehicleAmP {
     signal SplitControl.stopDone(SUCCESS);
   }
   command error_t SplitControl.start() {
-    atomic {
-      recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr = &recvAm, sizeof(VehicleMsg));
-      //carStopped = sendingBeacon = false;
-    }
+    recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr = &recvAm, sizeof(VehicleMsg));
+    sending = FALSE;
+    //carStopped = sendingBeacon = FALSE;
     post startDoneTask();
     return SUCCESS;
   }
@@ -46,30 +42,29 @@ module VehicleAmP {
   }
   task void receiveMsgTask() {
     call Leds.led0Toggle();
-    atomic {
-      call SerialAMPacket.setSource(recvAmPtr, call ActiveMessageAddress.amAddress());
-      call SerialAMPacket.setDestination(recvAmPtr, 0);
-      call SerialAMPacket.setType(recvAmPtr, AM_VEHICLE_RECEIVE);
-      call SerialAMPacket.setGroup(recvAmPtr, call SerialAMPacket.localGroup());
-      call SerialPacket.setPayloadLength(recvAmPtr, sizeof(VehicleMsg));
-      recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg)), sizeof(VehicleMsg));
-      recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg));
-    }
+    call SerialAMPacket.setSource(recvAmPtr, call ActiveMessageAddress.amAddress());
+    call SerialAMPacket.setDestination(recvAmPtr, 0);
+    call SerialAMPacket.setType(recvAmPtr, AM_VEHICLE_RECEIVE);
+    call SerialAMPacket.setGroup(recvAmPtr, call SerialAMPacket.localGroup());
+    call SerialPacket.setPayloadLength(recvAmPtr, sizeof(VehicleMsg));
+    recvAmPtr = signal Receive.receive[AM_VEHICLE_RECEIVE](recvAmPtr, call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg)), sizeof(VehicleMsg));
+    recvPayload = (VehicleMsg *)call SerialPacket.getPayload(recvAmPtr, sizeof(VehicleMsg));
   }
-  task void sendMsgDoneTask() {
-    message_t * tmpMsg;
-    error_t tmpError;
-    atomic {
-      tmpMsg = sendMsg;
-      tmpError = sendError;
-    }
-    signal AMSend.sendDone[AM_VEHICLE_SEND](tmpMsg, tmpError);
+  event VehicleMsg * VehicleData.receive(VehicleMsg *msg) {
+    recvPayload->dir = msg->dir;
+    recvPayload->icnum = msg->icnum;
+    recvPayload->speed = msg->speed;
+    post receiveMsgTask();
+    return msg;
+  }
+  event void VehicleData.sendDone(VehicleMsg *msg, error_t err) {
+    signal AMSend.sendDone[AM_VEHICLE_SEND](sendMsg, err);
+    sending = FALSE;
   }
   task void sendMsgIgnoredTask() {
     signal AMSend.sendDone[ignoredAm](ignoredMsg, SUCCESS); 
   }
   command error_t AMSend.send[am_id_t id](am_addr_t addr, message_t* msg, uint8_t len) {
-    error_t returnErr;
     VehicleMsg * vm;
     if (id != AM_VEHICLE_SEND) {
       ignoredAm = id;
@@ -77,16 +72,15 @@ module VehicleAmP {
       post sendMsgIgnoredTask();
       return SUCCESS;
     }
+    if (sending)
+      return FAIL;
     vm = (VehicleMsg *)call SerialPacket.getPayload(msg, sizeof(VehicleMsg));
-    atomic {
-      sendBuf.id = recvBuf.id;
-      sendBuf.speed = (uint8_t)vm->speed;
-      sendBuf.dir = vm->dir;
-      sendBuf.icnum = vm->icnum;
-      sendMsg = msg;
-      returnErr = sendError;
-    }
-    return returnErr;
+    sendBuf.speed = (uint8_t)vm->speed;
+    sendBuf.dir = vm->dir;
+    sendBuf.icnum = vm->icnum;
+    sendMsg = msg;
+    sending = TRUE;
+    return call VehicleData.send(&sendBuf);
   }
   command error_t AMSend.cancel[am_id_t id](message_t* msg) {
     return FAIL;
@@ -96,10 +90,6 @@ module VehicleAmP {
   }
   command void* AMSend.getPayload[am_id_t id](message_t* msg, uint8_t len) {
     return call SerialPacket.getPayload(msg, len);
-  }
-  event void Timer.fired() {
-    atomic {
-    }
   }
   async event void ActiveMessageAddress.changed() {}
 
