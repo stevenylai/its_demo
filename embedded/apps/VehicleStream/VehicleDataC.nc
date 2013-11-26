@@ -5,6 +5,7 @@ configuration VehicleDataC {
   }
 } implementation {
   components VehicleDataP, SerialActiveMessageC as Serial, PlatformSerialC;
+  components new TimerMilliC();
   components LedsC;
   //components NoLedsC as LedsC;
 
@@ -14,4 +15,5 @@ configuration VehicleDataC {
 
   VehicleDataP.UartStream -> PlatformSerialC;
   VehicleDataP.Leds -> LedsC;
+  VehicleDataP.Timer -> TimerMilliC;
 }

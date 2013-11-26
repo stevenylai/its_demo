@@ -4,6 +4,7 @@ module VehicleDataP {
   uses {
     interface UartStream;
     interface Leds;
+    interface Timer<TMilli> as Timer;
   } provides {
     interface SplitControl;
     interface VehicleData;
@@ -11,12 +12,14 @@ module VehicleDataP {
 } implementation {
   vehicle_receive_t recvBuf;
   uint8_t recvBufIdx;
-  bool recvBufBusy;
+  struct vehicle_receive_queue recvQueue;
 
   VehicleMsg recvMsgBuf, *recvMsg, *sendMsg;
 
   vehicle_send_t sendBuf;
   error_t sendError;
+
+  int counter;
 
   task void startDoneTask() {
     signal SplitControl.startDone(SUCCESS);
@@ -30,11 +33,13 @@ module VehicleDataP {
       recvBuf.speed = 0;
       recvBufIdx = sizeof(vehicle_receive_t);
       recvMsg = &recvMsgBuf;
-      recvBufBusy = FALSE;
+      queue_clear(&recvQueue, RECEIVE_QUEUE_LEN);
 
       sendBuf.preamble = 0xFF; // Always fixed
       sendBuf.id = TOS_NODE_ID;
     }
+    counter = 0;
+    call Timer.startPeriodic(2000);
     post startDoneTask();
     return SUCCESS;
   }
@@ -42,16 +47,29 @@ module VehicleDataP {
     post stopDoneTask();
     return SUCCESS;
   }
-  task void receiveMsgTask() {
-    call Leds.led0Toggle();
+  task void receiveQueueTask() {
+    vehicle_receive_t item;
     atomic {
-      recvMsg->dir = recvBuf.dir;
-      recvMsg->speed= recvBuf.speed;
-      recvMsg->icnum = recvBuf.icnum;
+      if (dequeue(&recvQueue, RECEIVE_QUEUE_LEN, &item) == SUCCESS) {
+	recvMsg->speed = item.speed;
+	recvMsg->icnum = item.icnum;
+	recvMsg->dir = item.dir;
+	recvMsg = signal VehicleData.receive(recvMsg);
+      }
+      if (!queue_empty(&recvQueue, RECEIVE_QUEUE_LEN))
+	post receiveQueueTask();
     }
-    recvMsg = signal VehicleData.receive(recvMsg);
-    atomic recvBufBusy = FALSE;
   }
+  event void Timer.fired() {
+    atomic {
+      if (!recvBuf.speed && ++counter > STOP_TIMEOUT) {
+	enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
+	counter = 0;
+	post receiveQueueTask();
+      }
+    }
+  }
+
   command error_t VehicleData.send(VehicleMsg *msg) {
     atomic {
       sendBuf.speed = msg->speed;
@@ -75,14 +93,15 @@ module VehicleDataP {
   }
   async event void UartStream.receivedByte( uint8_t byte ) {
     atomic {
-      if (byte == VEHICLE_PREAMBLE) {
+      if (byte == VEHICLE_PREAMBLE)
         recvBufIdx = 0;
-	recvBufBusy = TRUE;
-      }
       if (recvBufIdx < sizeof(vehicle_receive_t)) {
         ((uint8_t *)&recvBuf)[recvBufIdx++] = byte;
         if (recvBufIdx == sizeof(vehicle_receive_t)) {
-          post receiveMsgTask();
+	  if (recvBuf.speed)
+	    counter = 0;
+	  enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
+          post receiveQueueTask();
         }
       } else { /* Ignored */ }
     }

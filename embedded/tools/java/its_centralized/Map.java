@@ -9,6 +9,7 @@ class Map implements ITSReceiver{
   public CarKeeper keeper;
   public ITSSender sender;
   public static final int SAFE_EXIT_INTERVAL = 4000;
+  public static final int STOPPED_EXPIRIY = 16000;
 
   static public String getDirString (int dir) {
     switch (dir) {
@@ -174,7 +175,18 @@ class Map implements ITSReceiver{
       return false;
     }
   }
-  public void receiveMsg (int carID, int dir, int pos, int speed) {
+
+  public synchronized void checkInactiveCars() {
+    for (Enumeration<Car> e = this.cars.elements(); e.hasMoreElements();) {
+      Car car = e.nextElement();
+      if (!car.stopped || this.dispatcher.hasCar(car))
+         continue;
+      Date current = new Date();
+      if (current.getTime() - car.freshness.getTime() < Map.STOPPED_EXPIRIY)
+	  car.remove();
+    }
+  }
+  public synchronized void receiveMsg (int carID, int dir, int pos, int speed) {
     Road start = this.startRoads.get(new Integer(pos));
     Road end = null;
     Car car = this.cars.get(new Integer(carID));

@@ -86,6 +86,9 @@ public class Packet implements MessageListener, ITSSender {
     Packet comm = new Packet(mif);
     Map its_map = new Map(comm);
     comm.addITSListener(its_map);
+    CarRemover remover = new CarRemover(its_map);
+    Thread remover_thread = new Thread(remover);
+    remover_thread.start();
 
     while (true) {
       Thread.sleep(2000);
