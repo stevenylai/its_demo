@@ -9,7 +9,7 @@ class Map implements ITSReceiver{
   public CarKeeper keeper;
   public ITSSender sender;
   public static final int SAFE_EXIT_INTERVAL = 4000;
-  public static final int STOPPED_EXPIRIY = 16000;
+  public static final int STOPPED_EXPIRY = 16000;
 
   static public String getDirString (int dir) {
     switch (dir) {
@@ -182,8 +182,10 @@ class Map implements ITSReceiver{
       if (!car.stopped || this.dispatcher.hasCar(car))
          continue;
       Date current = new Date();
-      if (current.getTime() - car.freshness.getTime() < Map.STOPPED_EXPIRIY)
-	  car.remove();
+      if (current.getTime() - car.freshness.getTime() < Map.STOPPED_EXPIRY) {
+        System.out.println("Car " + car.id + " has stopped without any messages for over " + Map.STOPPED_EXPIRY + " seconds. Removing it");
+	      car.remove();
+      }
     }
   }
   public synchronized void receiveMsg (int carID, int dir, int pos, int speed) {
