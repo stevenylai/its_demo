@@ -204,6 +204,12 @@ class Map implements ITSReceiver{
       car.status = (start==null?Car.LEAVING:car.ENTERING);
       this.cars.put(new Integer(car.id), car);
       car.switchTo(start==null?end:start);
+      System.err.print("Car: " + carID + " has been added. Current known cars: [");
+      for (Enumeration<Car> e = this.cars.elements(); e.hasMoreElements();) {
+        Car known_car = e.nextElement();
+        System.err.print(known_car.id + " ");
+      }
+      System.err.println("]");
     } else if (stateIsUnchanged(car, start, end)) {
       car.freshness = new Date();
       return;
