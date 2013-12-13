@@ -62,7 +62,7 @@ module VehicleDataP {
   }
   event void Timer.fired() {
     atomic {
-      if (!recvBuf.speed && ++counter > STOP_TIMEOUT) {
+      if (++counter > STOP_TIMEOUT) {
 	enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
 	counter = 0;
 	post receiveQueueTask();

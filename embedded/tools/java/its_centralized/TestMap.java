@@ -8,6 +8,7 @@ public class TestMap implements ITSSender {
     this.msgListeners = new ArrayList<ITSReceiver>();
     this.msgs = new ArrayList<int[]>();
     // Collision avoidance
+
     try {
       Thread.sleep(1000);
     } catch (InterruptedException e) {}
@@ -24,6 +25,12 @@ public class TestMap implements ITSSender {
     this.msgs.add(new int[]{5, 1, 82, 5});
     this.msgs.add(new int[]{1, 1, 59, 5});
     this.msgs.add(new int[]{1, 1, 61, 5});
+
+    try {
+      Thread.sleep(10000);
+    } catch (InterruptedException e) {}
+    this.msgs.add(new int[]{6, 1, 7, 5});
+    this.msgs.add(new int[]{7, 1, 7, 5});
     /*
     try {
       Thread.sleep(1000);
