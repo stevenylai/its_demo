@@ -89,6 +89,7 @@ public class Packet implements MessageListener, ITSSender {
     CarRemover remover = new CarRemover(its_map);
     Thread remover_thread = new Thread(remover);
     remover_thread.start();
+    System.err.println("##########################Starting up demo##########################");
 
     while (true) {
       Thread.sleep(2000);
