@@ -194,7 +194,10 @@ class Map implements ITSReceiver{
       end = this.endRoads.get(new Integer(pos));
     }
     if (start == null && end == null) {
-      System.out.println("Cannot find the car with pos: " + pos);
+	if (pos == 0)
+	    System.err.println("Waiting for data for car: " + carID);
+	else
+	    System.out.println("Invalid pos: " + pos + "reported from car: " + carID);
       return;
     }
     if (car == null) {
