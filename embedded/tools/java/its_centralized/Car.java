@@ -4,6 +4,7 @@ class Car {
     public final static int ENTERING = 0;
     public final static int LEAVING = 1;
     public final static int TRANSIT = 2;
+    public final static int DEFAULT_SPEED = 3;
 
     public int id;
     public boolean stopped;
@@ -16,6 +17,7 @@ class Car {
     public Car (int id, Road belongs) {
 	this.id = id;
 	this.belongs = belongs;
+	this.speed = Car.DEFAULT_SPEED;
 	this.freshness = new Date();
 	this.lastControl = new Date();
 	this.stopped = false;

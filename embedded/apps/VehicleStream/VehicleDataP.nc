@@ -31,6 +31,8 @@ module VehicleDataP {
     atomic {
       recvBuf.id = TOS_NODE_ID;
       recvBuf.speed = 0;
+      recvBuf.dir = 0;
+      recvBuf.icnum = 0;
       recvBufIdx = sizeof(vehicle_receive_t);
       recvMsg = &recvMsgBuf;
       queue_clear(&recvQueue, RECEIVE_QUEUE_LEN);
@@ -39,7 +41,7 @@ module VehicleDataP {
       sendBuf.id = TOS_NODE_ID;
     }
     counter = 0;
-    call Timer.startPeriodic(2000);
+    call Timer.startPeriodic(1000);
     post startDoneTask();
     return SUCCESS;
   }
