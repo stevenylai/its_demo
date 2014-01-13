@@ -46,12 +46,12 @@ public class MessageDispatcher implements Runnable{
 	    int i;
 	    for (i = 0; i < this.dispatchList.size(); i++) {
 		Date current = new Date();
-		if (current.getTime() - this.dispatchList.get(i).date.getTime() >= MessageDispatcher.STARTUP_DELAY) {
-		    System.out.println("Dispatching car: " + this.dispatchList.get(i).car);
+		if (current.getTime() - this.dispatchList.get(i).car.belongs.lastExit.getTime() >= MessageDispatcher.STARTUP_DELAY) {
+		    System.out.println("Dispatching car: " + this.dispatchList.get(i).car + " at " + current);
 		    this.map.startCar(this.dispatchList.get(i).car);
 		    this.map.turnCar(this.dispatchList.get(i).car, this.dispatchList.get(i).exit);
 		    System.out.println("Road " + this.dispatchList.get(i).exit + ". lastExit: " + this.dispatchList.get(i).exit.lastExit + " this exit " + current);
-		    this.dispatchList.get(i).exit.lastExit = current;
+		    this.dispatchList.get(i).car.belongs.lastExit = current;
 		    break;
 		}
 	    }

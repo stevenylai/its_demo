@@ -155,11 +155,11 @@ class Map implements ITSReceiver{
             if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
         	Road exit = car.belongs.chooseExit();
         	if (exit != null)
-        	    System.out.println("Exit road at: " + current + ", previous exit time: " + exit.lastExit);
+        	    System.out.println("Exit road at: " + current + ", previous exit time: " + car.belongs.lastExit);
         	if (exit == null) { // All exit roads are full, stop the car
         	    System.out.println(car.toString() + " is stopped because there is no exit available");
         	    this.stopCar(car);
-        	} else if (current.getTime() - exit.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
+        	} else if (current.getTime() - car.belongs.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
         	    System.out.println(car.toString() + " is running too close to the previous car. Trying to pause it");
         	    this.stopCar(car);
         	    this.dispatcher.addCar(car, current, exit);
@@ -168,14 +168,14 @@ class Map implements ITSReceiver{
         	    if (car.stopped) {
         		this.startCar(car);
         		this.turnCar(car, exit);
-        		System.out.println("Road " + exit.toString() + ". lastExit: " + exit.lastExit + " this exit " + current);
-        		exit.lastExit = current;
+        		System.out.println("Road " + exit.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
+        		car.belongs.lastExit = current;
         		//this.dispatcher.addCar(car, current, exit);
         	    } else {
         		this.startCar(car);
         		this.turnCar(car, exit);
-        		System.out.println("Road " + exit.toString() + ". lastExit: " + exit.lastExit + " this exit " + current);
-        		exit.lastExit = current;
+        		System.out.println("Road " + exit.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
+        		car.belongs.lastExit = current;
         	    }
         	}
             }
