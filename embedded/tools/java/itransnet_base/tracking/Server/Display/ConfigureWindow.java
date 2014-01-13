@@ -60,7 +60,7 @@ public class ConfigureWindow extends JFrame implements Runnable, SensorConstants
 		JMenuItem startCar = new JMenuItem("Start Cars");
 		startCar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				mgr.startCars();
+			    //mgr.startCars();
 			}
 		});
 
@@ -70,7 +70,7 @@ public class ConfigureWindow extends JFrame implements Runnable, SensorConstants
 		JMenuItem stopCar = new JMenuItem("Stop Cars");
 		stopCar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				mgr.stopCars();
+			    //mgr.stopCars();
 			}
 		});
 
