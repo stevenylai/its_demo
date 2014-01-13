@@ -8,7 +8,7 @@ class Map implements ITSReceiver{
     public MessageDispatcher dispatcher;
     public CarKeeper keeper;
     public ITSSender sender;
-    public static final int SAFE_EXIT_INTERVAL = 4000;
+    public static final int SAFE_EXIT_INTERVAL = 3000;
     public static final int STOPPED_EXPIRY = 16000;
     public static final int CMD_RESEND_INTERVAL = 10000;
 

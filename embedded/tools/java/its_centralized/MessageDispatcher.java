@@ -14,7 +14,6 @@ public class MessageDispatcher implements Runnable{
     List<DispatchInfo> dispatchList;
     Map map;
     int sleep;
-    final static int STARTUP_DELAY = 1000;
 
     public MessageDispatcher (Map map) {
 	this.map = map;
@@ -46,7 +45,7 @@ public class MessageDispatcher implements Runnable{
 	    int i;
 	    for (i = 0; i < this.dispatchList.size(); i++) {
 		Date current = new Date();
-		if (current.getTime() - this.dispatchList.get(i).car.belongs.lastExit.getTime() >= MessageDispatcher.STARTUP_DELAY) {
+		if (current.getTime() - this.dispatchList.get(i).car.belongs.lastExit.getTime() >= Map.SAFE_EXIT_INTERVAL) {
 		    System.out.println("Dispatching car: " + this.dispatchList.get(i).car + " at " + current);
 		    this.map.startCar(this.dispatchList.get(i).car);
 		    this.map.turnCar(this.dispatchList.get(i).car, this.dispatchList.get(i).exit);
