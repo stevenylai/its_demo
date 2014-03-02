@@ -16,10 +16,10 @@ import itransnet_base.tracking.Server.DataEngine.XML.*;
  */
 public class Map
 {
+    private final static String MAP_DIR = "C:";
   public static Map defaultMap=new Map();
  
   private ArrayList errorList=new ArrayList();
-  
   
   private ArrayList road;    // All the roads information
   // Table to look up which road the sensor belongs to.
@@ -44,7 +44,7 @@ public class Map
 	loader = new MapLoader (this);
 	//loadMap ("C:/UCB/cygwin/opt/tinyos-1.x/contrib/iTranSNet/tools/java/itransnet_base/tracking/map.xml");
 	//loadMap ("D:/wtp-its/ITS-tool/itransnet_base/tracking/map.xml");
-	loadMap ("C:/map.xml");
+	loadMap (MAP_DIR+"/map.xml");
 	
 	//errorList.add("1");
 	//errorList.add("2");
