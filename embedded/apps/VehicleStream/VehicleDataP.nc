@@ -39,8 +39,8 @@ module VehicleDataP {
 
       sendBuf.preamble = 0xFF; // Always fixed
       sendBuf.id = TOS_NODE_ID;
+      counter = 0;
     }
-    counter = 0;
     call Timer.startPeriodic(1000);
     post startDoneTask();
     return SUCCESS;
@@ -53,21 +53,21 @@ module VehicleDataP {
     vehicle_receive_t item;
     atomic {
       if (dequeue(&recvQueue, RECEIVE_QUEUE_LEN, &item) == SUCCESS) {
-	recvMsg->speed = item.speed;
-	recvMsg->icnum = item.icnum;
-	recvMsg->dir = item.dir;
-	recvMsg = signal VehicleData.receive(recvMsg);
+        recvMsg->speed = item.speed;
+        recvMsg->icnum = item.icnum;
+        recvMsg->dir = item.dir;
+        recvMsg = signal VehicleData.receive(recvMsg);
       }
       if (!queue_empty(&recvQueue, RECEIVE_QUEUE_LEN))
-	post receiveQueueTask();
+        post receiveQueueTask();
     }
   }
   event void Timer.fired() {
     atomic {
       if (++counter > STOP_TIMEOUT) {
-	enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
-	counter = 0;
-	post receiveQueueTask();
+        enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
+        counter = 0;
+        post receiveQueueTask();
       }
     }
   }
@@ -100,9 +100,9 @@ module VehicleDataP {
       if (recvBufIdx < sizeof(vehicle_receive_t)) {
         ((uint8_t *)&recvBuf)[recvBufIdx++] = byte;
         if (recvBufIdx == sizeof(vehicle_receive_t)) {
-	  if (recvBuf.speed)
-	    counter = 0;
-	  enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
+          if (recvBuf.speed)
+            counter = 0;
+          enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
           post receiveQueueTask();
         }
       } else { /* Ignored */ }

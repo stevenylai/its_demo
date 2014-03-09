@@ -5,6 +5,7 @@ configuration TrafficLightDataC {
   }
 } implementation {
   components TrafficLightDataP, SerialActiveMessageC as Serial, PlatformSerialC;
+  components new TimerMilliC();
   components LedsC;
   //components NoLedsC as LedsC;
 
@@ -14,4 +15,5 @@ configuration TrafficLightDataC {
 
   TrafficLightDataP.UartStream -> PlatformSerialC;
   TrafficLightDataP.Leds -> LedsC;
+  TrafficLightDataP.Timer -> TimerMilliC;
 }
