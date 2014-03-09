@@ -1,0 +1,3 @@
+COMPONENT=BaseStationC
+CFLAGS+=-I../BaseStationAck -DPLATFORM_BAUDRATE=9600 -v
+include $(MAKERULES)
