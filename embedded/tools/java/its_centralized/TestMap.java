@@ -1,11 +1,12 @@
 import java.util.*;
+import net.tinyos.message.*;
 
 public class TestMap implements ITSSender {
-    private List<ITSReceiver> msgListeners;
+    private List<CarReceiver> carListeners;
     private List<int[]> msgs;
 
     public TestMap () {
-        this.msgListeners = new ArrayList<ITSReceiver>();
+        this.carListeners = new ArrayList<CarReceiver>();
         this.msgs = new ArrayList<int[]>();
         // Collision avoidance
 
@@ -55,27 +56,24 @@ public class TestMap implements ITSSender {
           this.msgs.add(new int[]{2, 1, 10, 5});
         */
     }
-    public void addITSListener (ITSReceiver receiver) {
-        this.msgListeners.add(receiver);
+    public void addCarListener (CarReceiver receiver) {
+        this.carListeners.add(receiver);
     }
     public void run () {
         for (int[] msg : this.msgs) {
-            for (ITSReceiver receiver : this.msgListeners) {
+            for (CarReceiver receiver : this.carListeners) {
                 System.out.println("Receiving message:" + Integer.toString(msg[0]) + " " + Integer.toString(msg[1]) + " " + Integer.toString(msg[2]) + " " + Integer.toString(msg[3]));
-                receiver.receiveMsg(msg[0], msg[1], msg[2], msg[3]);
+                receiver.receiveCar(msg[0], msg[1], msg[2], msg[3]);
             }
         }
     }
-    public void setSpeed(Car car, int speed) {
-        System.out.println("Setting speed of car : "+Integer.toString(car.id)+" to: "+Integer.toString(speed));
-    }
-    public void setDir(Car car, int dir) {
-        System.out.println("Setting dir of car : "+Integer.toString(car.id)+" to: "+Map.getDirString(dir));
+    public void sendPacket(int id, Message msg) {
+	System.out.println("Sending packet " + msg);
     }
     public static void main(String[] args) throws Exception {
         TestMap tester = new TestMap();
         Map its_map = new Map(tester);
-        tester.addITSListener(its_map);
+        tester.addCarListener(its_map);
         tester.run();
         //tester.run();
         Thread.yield();

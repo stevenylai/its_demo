@@ -1,4 +1,3 @@
 public interface ITSSender {
-  public void setSpeed(Car car, int speed);
-  public void setDir(Car car, int dir);
+    public void sendPacket(int id, net.tinyos.message.Message msg);
 }

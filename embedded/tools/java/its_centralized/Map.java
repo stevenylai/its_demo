@@ -1,8 +1,9 @@
 import java.util.*;
 
-class Map implements ITSReceiver{
+class Map implements CarReceiver, TrafficLightReceiver{
     private static boolean debug = false;
     public Dictionary <Integer, Car> cars;
+    public Dictionary <Integer, TrafficLight> trafficLights;
     public Dictionary <Integer, Road> startRoads;
     public Dictionary <Integer, Road> endRoads;
     public MessageDispatcher dispatcher;
@@ -36,6 +37,14 @@ class Map implements ITSReceiver{
         for (int x=0; x<MapInfo.roadInfo.size(); x++) { // Add all roads
             int [] roadInfo = MapInfo.roadInfo.get(x);
             Road road = new Road(roadInfo[0], roadInfo[1], roadInfo[2]);
+	    if (roadInfo[9] > 0) {
+		TrafficLight light = this.trafficLights.get(new Integer(roadInfo[9]));
+		if (light == null) {
+		    light = new TrafficLight(roadInfo[9], this.sender);
+		    this.trafficLights.put(new Integer(roadInfo[9]), light);
+		}
+		road.setTrafficLight(light, roadInfo[10]);
+	    }
             startRoads.put(new Integer(road.startIC), road);
             endRoads.put(new Integer(road.endIC), road);
             this.logln("Constructed road: " + Integer.toString(road.startIC) + " - " + Integer.toString(road.endIC));
@@ -73,6 +82,7 @@ class Map implements ITSReceiver{
     public Map (ITSSender sender) {
         this.sender = sender;
         this.cars = new Hashtable <Integer, Car> ();
+	this.trafficLights = new Hashtable <Integer, TrafficLight> ();
         this.startRoads = new Hashtable <Integer, Road> ();
         this.endRoads = new Hashtable <Integer, Road> ();
         this.keeper = new CarKeeper();
@@ -81,37 +91,7 @@ class Map implements ITSReceiver{
         dispatcherThread.start();
         this.constructMap();
     }
-    private void stopCar (Car car) {
-        if (!car.stopped) {
-            car.stopped = true;
-            car.speed = 0;
-            sender.setSpeed(car, 0);
-            car.lastControl = new Date();
-        }
-    }
-    public void startCar (Car car) {
-        if (car.stopped) {
-            car.stopped = false;
-            car.speed = Car.DEFAULT_SPEED;
-            sender.setSpeed(car, car.speed);
-            car.lastControl = new Date();
-        }
-    }
-    public void turnCar (Car car, Road road) {
-        for (Enumeration<Integer> e = car.belongs.exitRoads.keys(); e.hasMoreElements();) {
-            Integer turn = e.nextElement();
-            if (car.belongs.exitRoads.get(turn) == road) {
-        	if (turn.intValue() == 1) { // 1: straight - no need to turn
-        	    sender.setDir(car, 0);
-        	    car.lastControl = new Date();
-        	} else {
-        	    sender.setDir(car, 1);
-        	    car.lastControl = new Date();
-        	}
-        	 
-            }
-        }
-    }
+
     private void checkStoppedCars() {
         for (Enumeration<Car> e = this.cars.elements(); e.hasMoreElements();) {
             Car car = e.nextElement();
@@ -139,7 +119,7 @@ class Map implements ITSReceiver{
         	    /* Nothing */;
         	else if (car.belongs.cross.waiting.get(0) != car && car.belongs.cross.waiting.size() > 1) {
         	    if (!car.stopped) {
-        		this.stopCar(car);
+        		car.stop();
         		System.out.print(car.toString() + " is stopped to avoid collision, intersection wait queue: ");
         	    } else {
         		System.out.print(car.toString() + " cannot start because intersection is still busy: ");
@@ -158,22 +138,22 @@ class Map implements ITSReceiver{
         	    System.out.println("Exit road at: " + current + ", previous exit time: " + car.belongs.lastExit);
         	if (exit == null) { // All exit roads are full, stop the car
         	    System.out.println(car.toString() + " is stopped because there is no exit available");
-        	    this.stopCar(car);
+        	    car.stop();
         	} else if (current.getTime() - car.belongs.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
         	    System.out.println(car.toString() + " is running too close to the previous car. Trying to pause it");
-        	    this.stopCar(car);
+        	    car.stop();
         	    this.dispatcher.addCar(car, current, exit);
         	} else {
         	    System.out.println(car.toString() + " is instructed to switch to " + exit.toString());
         	    if (car.stopped) {
-        		this.startCar(car);
-        		this.turnCar(car, exit);
+        		car.start();
+        		car.turn(exit);
         		System.out.println("Road " + exit.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
         		car.belongs.lastExit = current;
         		//this.dispatcher.addCar(car, current, exit);
         	    } else {
-        		this.startCar(car);
-        		this.turnCar(car, exit);
+        		car.start();
+        		car.turn(exit);
         		System.out.println("Road " + exit.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
         		car.belongs.lastExit = current;
         	    }
@@ -221,7 +201,12 @@ class Map implements ITSReceiver{
             this.dumpCarList();
         }
     }
-    public synchronized void receiveMsg (int carID, int dir, int pos, int speed) {
+    public synchronized void receiveTrafficLight (int id, int dir, int color, int remain) {
+	TrafficLight light = this.trafficLights.get(new Integer(id));
+	if (light != null)
+	    light.update(dir, color, remain);
+    }
+    public synchronized void receiveCar (int carID, int dir, int pos, int speed) {
         Road start = this.startRoads.get(new Integer(pos));
         Road end = this.endRoads.get(new Integer(pos));
         Car car = this.cars.get(new Integer(carID));
@@ -234,7 +219,7 @@ class Map implements ITSReceiver{
             return;
         }
         if (car == null) {
-            car = new Car(carID, start==null?end:start);
+            car = new Car(carID, this.sender, start==null?end:start);
             if (start == null)
         	car.status = Car.LEAVING;
             else if (end == null)
@@ -251,7 +236,7 @@ class Map implements ITSReceiver{
         	// Re-send control command in case the car fail to start for whatever reason
         	if (speed == 0 && !car.stopped && !this.dispatcher.hasCar(car)) {
         	    System.out.println("Resend control message to car: " + car.id);
-        	    sender.setSpeed(car, car.speed);
+        	    car.setSpeed(car.speed);
         	    car.lastControl = new Date();
         	}
             }
