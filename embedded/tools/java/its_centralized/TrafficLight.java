@@ -14,6 +14,11 @@ class TrafficLightInfo {
 	this.remain = 0;
 	this.lastUpdated = null;
     }
+    public void update(int color, int remain) {
+	this.color = color;
+	this.remain = remain;
+	this.lastUpdated = new Date();
+    }
 }
 // Test for TrafficLigtMsg
 public class TrafficLight {
@@ -28,6 +33,9 @@ public class TrafficLight {
     public static final short DIR_EAST = 0;
     public static final short DIR_WEST = 2;
     public static final short DIR_UNKNOWN = 4;
+
+    public static final long EXPIRY_DURATION = 10; // 10 seconds
+    public static final int defaultColorDuration = 8;
 
     public static Date lastUpdate = null;
 
@@ -47,10 +55,44 @@ public class TrafficLight {
 	}
     }
 
+    public void updateInfo(int dir, int color, int remain) {
+	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
+	lightInfo.update(color, remain);
+	TrafficLight.lastUpdate = new Date();
+    }
     public void addRoad(int dir, Road road) {
 	this.roads.put(new Integer(dir), road);
     }
-
+    public boolean askPass(int dir) {
+	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
+	if (lightInfo.color == TrafficLight.LIGHT_GREEN)
+	    return true;
+	else {
+	    int dirOther1 = (dir + 1) % DIR_UNKNOWN, dirOther2 = (dir + 3) % DIR_UNKNOWN;
+	    Road roadOther1 = this.roads.get(new Integer(dirOther1)),
+		roadOther2 = this.roads.get(new Integer(dirOther2));
+	    
+	    if ((roadOther1 == null || roadOther1.cars.size() == 0) &&
+		(roadOther2 == null || roadOther2.cars.size() == 0)) {
+		this.setLight((short)dir, TrafficLight.LIGHT_GREEN, TrafficLight.defaultColorDuration);
+		this.setLight((short)((dir + 2) % 4), TrafficLight.LIGHT_GREEN, TrafficLight.defaultColorDuration);
+		this.setLight((short)dirOther1, TrafficLight.LIGHT_RED, TrafficLight.defaultColorDuration);
+		this.setLight((short)dirOther2, TrafficLight.LIGHT_RED, TrafficLight.defaultColorDuration);
+		return true;
+	    } else
+		return false;
+	}
+    }
+    public static boolean isInEffect() {
+	if (TrafficLight.lastUpdate == null)
+	    return false;
+	Date current = new Date();
+	long diff = current.getTime() - TrafficLight.lastUpdate.getTime();
+	if (diff > TrafficLight.EXPIRY_DURATION)
+	    return false;
+	else
+	    return true;
+    }
     public static String dirString(short dir) {
 	switch (dir) {
 	case DIR_NORTH:

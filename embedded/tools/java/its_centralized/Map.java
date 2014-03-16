@@ -109,7 +109,14 @@ class Map implements CarReceiver, TrafficLightReceiver{
         boolean tryToStartCar = false;
         Date current = new Date();
         if (car.status == Car.LEAVING || car.status == Car.TRANSIT) {
-            if (car.belongs.cross != null) {
+	    if (car.belongs.trafficLight != null && TrafficLight.isInEffect()) { // Traffic light control
+		if (car.belongs.checkTrafficLight())
+		    tryToStartCar = true;
+		else {
+		    if (!car.stopped)
+			car.stop();
+		}
+            } else if (car.belongs.cross != null) {
         	if (car.status == Car.TRANSIT)
         	    tryToStartCar = true;
         	else if (!car.belongs.cross.waiting.contains(car)) // Collision avoidance
@@ -204,7 +211,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
     public synchronized void receiveTrafficLight (int id, int dir, int color, int remain) {
 	TrafficLight light = this.trafficLights.get(new Integer(id));
 	if (light != null)
-	    light.update(dir, color, remain);
+	    light.updateInfo(dir, color, remain);
     }
     public synchronized void receiveCar (int carID, int dir, int pos, int speed) {
         Road start = this.startRoads.get(new Integer(pos));

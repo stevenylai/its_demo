@@ -24,6 +24,12 @@ class Road {
 	this.trafficLightDir = dir;
 	light.addRoad(dir, this);
     }
+    public boolean checkTrafficLight() {
+	if (this.trafficLight == null)
+	    return true;
+	else
+	    return this.trafficLight.askPass(this.trafficLightDir);
+    }
     public Road chooseExit () {
 	List<Road> avail = new ArrayList<Road>();
 	for (Enumeration<Road> e = this.exitRoads.elements(); e.hasMoreElements();) {
