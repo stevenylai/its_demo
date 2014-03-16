@@ -14,10 +14,12 @@ class TrafficLightInfo {
 	this.remain = 0;
 	this.lastUpdated = null;
     }
-    public void update(int color, int remain) {
+    public boolean update(int color, int remain) {
+	boolean changed = (this.color == color);
 	this.color = color;
 	this.remain = remain;
 	this.lastUpdated = new Date();
+	return changed;
     }
 }
 // Test for TrafficLigtMsg
@@ -54,18 +56,28 @@ public class TrafficLight {
 	    this.info.put(new Integer(i), lightInfo);
 	}
     }
-
-    public void updateInfo(int dir, int color, int remain) {
+    public Car getFirstCar(int dir) {
+	Road road = this.roads.get(new Integer(dir));
+	if (road == null)
+	    return null;
+	else if (road.cars.size() > 0)
+	    return road.cars.get(0);
+	else
+	    return null;
+    }
+    public boolean updateInfo(int dir, int color, int remain) {
 	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
-	lightInfo.update(color, remain);
+	boolean changed = lightInfo.update(color, remain);
 	TrafficLight.lastUpdate = new Date();
+	return changed;
     }
     public void addRoad(int dir, Road road) {
 	this.roads.put(new Integer(dir), road);
     }
     public boolean askPass(int dir) {
 	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
-	if (lightInfo.color == TrafficLight.LIGHT_GREEN)
+	if (lightInfo.color == TrafficLight.LIGHT_GREEN ||
+	    lightInfo.color == TrafficLight.LIGHT_UNKNOWN)
 	    return true;
 	else {
 	    int dirOther1 = (dir + 1) % DIR_UNKNOWN, dirOther2 = (dir + 3) % DIR_UNKNOWN;

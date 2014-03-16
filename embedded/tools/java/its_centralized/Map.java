@@ -210,8 +210,14 @@ class Map implements CarReceiver, TrafficLightReceiver{
     }
     public synchronized void receiveTrafficLight (int id, int dir, int color, int remain) {
 	TrafficLight light = this.trafficLights.get(new Integer(id));
-	if (light != null)
-	    light.updateInfo(dir, color, remain);
+	if (light != null) {
+	    boolean changed = light.updateInfo(dir, color, remain);
+	    if (changed) {
+		Car car = light.getFirstCar(dir);
+		if (car != null)
+		    this.checkCar(car);
+	    }
+	}
     }
     public synchronized void receiveCar (int carID, int dir, int pos, int speed) {
         Road start = this.startRoads.get(new Integer(pos));
