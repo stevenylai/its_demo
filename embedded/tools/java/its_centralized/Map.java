@@ -92,10 +92,10 @@ class Map implements CarReceiver, TrafficLightReceiver{
         this.constructMap();
     }
 
-    private void checkStoppedCars() {
+    private void checkStoppedCars(Car excluding) {
         for (Enumeration<Car> e = this.cars.elements(); e.hasMoreElements();) {
             Car car = e.nextElement();
-            if (!car.stopped || this.dispatcher.hasCar(car))
+            if (!car.stopped || this.dispatcher.hasCar(car) || excluding == car)
         	continue;
             this.checkCar(car);
         }
@@ -109,12 +109,14 @@ class Map implements CarReceiver, TrafficLightReceiver{
         boolean tryToStartCar = false;
         Date current = new Date();
         if (car.status == Car.LEAVING || car.status == Car.TRANSIT) {
-	    if (car.belongs.trafficLight != null && TrafficLight.isInEffect()) { // Traffic light control
+	    if (car.belongs.trafficLight != null && car.belongs.trafficLight.isInEffect()) { // Traffic light control
 		if (car.belongs.checkTrafficLight())
 		    tryToStartCar = true;
 		else {
-		    if (!car.stopped)
+		    if (!car.stopped) {
+			System.out.println("Stopping car: " + car + " for traffic light.");
 			car.stop();
+		    }
 		}
             } else if (car.belongs.cross != null) {
         	if (car.status == Car.TRANSIT)
@@ -204,7 +206,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
         if (toBeRemoved.size() > 0) {
             for (int id : toBeRemoved)
         	this.cars.remove(id);
-            this.checkStoppedCars();
+            this.checkStoppedCars(null);
             this.dumpCarList();
         }
     }
@@ -214,10 +216,13 @@ class Map implements CarReceiver, TrafficLightReceiver{
 	    boolean changed = light.updateInfo(dir, color, remain);
 	    if (changed) {
 		Car car = light.getFirstCar(dir);
-		if (car != null)
+		if (car != null && car.stopped && light.getColor(dir) == TrafficLight.LIGHT_GREEN) {
+		    System.out.println("Traffic light changed to green, checking car: " + car);
 		    this.checkCar(car);
+		}
 	    }
-	}
+	} else
+	    System.err.println("Unknown traffic light id: " + id);
     }
     public synchronized void receiveCar (int carID, int dir, int pos, int speed) {
         Road start = this.startRoads.get(new Integer(pos));
@@ -270,7 +275,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
             System.out.println(car);
         }
         this.checkCar(car);
-        this.checkStoppedCars();
+        this.checkStoppedCars(car);
         this.keeper.checkInactiveCar(this.cars, this.dispatcher);
     }
     // For testing if the roads are constructed and connected correctly

@@ -27,8 +27,22 @@ class Road {
     public boolean checkTrafficLight() {
 	if (this.trafficLight == null)
 	    return true;
-	else
-	    return this.trafficLight.askPass(this.trafficLightDir);
+	else {
+	    System.out.println("Current traffic light color: " + TrafficLight.colorString(this.trafficLight.getColor(this.trafficLightDir)));
+	    /*
+	    if (this.trafficLight.askPass(this.trafficLightDir))
+		return true;
+	    else
+		return false;
+	    */
+
+	    if (this.trafficLight.getColor(this.trafficLightDir) == TrafficLight.LIGHT_GREEN)
+		return true;
+	    else {
+		this.trafficLight.askPass(this.trafficLightDir);
+		return false;
+	    }
+	}
     }
     public Road chooseExit () {
 	List<Road> avail = new ArrayList<Road>();

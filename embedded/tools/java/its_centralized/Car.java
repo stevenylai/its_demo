@@ -33,7 +33,7 @@ class Car {
 	}
     }
     public void stop() {
-	if (this.stopped) {
+	if (!this.stopped) {
 	    this.stopped = true;
 	    this.speed = 0;
 	    this.setSpeed(0);

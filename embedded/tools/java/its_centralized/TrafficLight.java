@@ -15,7 +15,7 @@ class TrafficLightInfo {
 	this.lastUpdated = null;
     }
     public boolean update(int color, int remain) {
-	boolean changed = (this.color == color);
+	boolean changed = (this.color != color);
 	this.color = color;
 	this.remain = remain;
 	this.lastUpdated = new Date();
@@ -36,12 +36,11 @@ public class TrafficLight {
     public static final short DIR_WEST = 2;
     public static final short DIR_UNKNOWN = 4;
 
-    public static final long EXPIRY_DURATION = 10; // 10 seconds
+    public static final long EXPIRY_DURATION = 10 * 1000; // 10 seconds
     public static final int defaultColorDuration = 8;
 
-    public static Date lastUpdate = null;
-
     public int id;
+    public Date lastUpdate = null;
     public ITSSender sender;
     public Dictionary <Integer, TrafficLightInfo> info;
     public Dictionary <Integer, Road> roads;
@@ -65,14 +64,57 @@ public class TrafficLight {
 	else
 	    return null;
     }
+    private int invertColor(int color) {
+	if ((short)color == TrafficLight.LIGHT_RED)
+	    return TrafficLight.LIGHT_GREEN;
+	else
+	    return TrafficLight.LIGHT_RED;
+    }
+    private int invertRemain(int color, int duration) {
+	if ((short)color == TrafficLight.LIGHT_RED) {
+	    if (duration > 2)
+		return duration - 2;
+	    else
+		return duration;
+	} else
+	    return duration + 2;
+    }
+    public void dumpColorInfo() {
+	Date cur = new Date();
+	System.out.print("Traffic Lights " + cur + ": " );
+	for (int dir = 0; dir < TrafficLight.DIR_UNKNOWN; dir++) {
+	    TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
+	    System.out.print(TrafficLight.dirString((short)dir) + ": " + TrafficLight.colorString((short)lightInfo.color) + ", ");
+	}
+	System.out.println("");
+    }
     public boolean updateInfo(int dir, int color, int remain) {
 	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
 	boolean changed = lightInfo.update(color, remain);
-	TrafficLight.lastUpdate = new Date();
+	if (changed && ((short)color == TrafficLight.LIGHT_GREEN ||
+			(short)color == TrafficLight.LIGHT_RED)) {
+	    lightInfo = this.info.get(new Integer((dir + 2) % 4));
+	    lightInfo.update(color, remain);
+	    lightInfo = this.info.get(new Integer((dir + 1) % 4));
+	    lightInfo.update(this.invertColor(color), this.invertRemain(color, remain));
+	    lightInfo = this.info.get(new Integer((dir + 3) % 4));
+	    lightInfo.update(this.invertColor(color), this.invertRemain(color, remain));
+	}
+	if (changed && (short)color != TrafficLight.LIGHT_YELLOW) {
+	    System.out.println("Received: " + TrafficLight.dirString((short)dir) + ": " + TrafficLight.colorString((short)color));
+	    this.dumpColorInfo();
+	    System.out.println("");
+	}
+	//System.out.println("Updating traffic light info, dir: " + dir + ", color: " + color + ", remain: " + remain);
+	this.lastUpdate = new Date();
 	return changed;
     }
     public void addRoad(int dir, Road road) {
 	this.roads.put(new Integer(dir), road);
+    }
+    public short getColor(int dir) {
+	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
+	return (short)lightInfo.color;
     }
     public boolean askPass(int dir) {
 	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
@@ -95,11 +137,12 @@ public class TrafficLight {
 		return false;
 	}
     }
-    public static boolean isInEffect() {
-	if (TrafficLight.lastUpdate == null)
+    public boolean isInEffect() {
+	if (this.lastUpdate == null)
 	    return false;
 	Date current = new Date();
-	long diff = current.getTime() - TrafficLight.lastUpdate.getTime();
+	long diff = current.getTime() - this.lastUpdate.getTime();
+
 	if (diff > TrafficLight.EXPIRY_DURATION)
 	    return false;
 	else
