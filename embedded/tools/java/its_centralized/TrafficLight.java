@@ -220,10 +220,12 @@ public class TrafficLight {
 
 	System.out.println("Starting the main loop");
 	while (true) {
+	    /*
 	    tl.setLight(TrafficLight.DIR_NORTH, TrafficLight.LIGHT_GREEN, 10);
 	    tl.setLight(TrafficLight.DIR_SOUTH, TrafficLight.LIGHT_GREEN, 10);
 	    tl.setLight(TrafficLight.DIR_EAST, TrafficLight.LIGHT_RED, 10);
 	    tl.setLight(TrafficLight.DIR_WEST, TrafficLight.LIGHT_RED, 10);
+	    */
 	    Thread.sleep(1000);
 	    Thread.yield();
 	}
