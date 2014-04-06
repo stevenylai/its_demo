@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.*;
+import java.text.*;
 
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
@@ -10,11 +11,16 @@ public class Packet implements MessageListener, ITSSender {
     private MoteIF moteIF;
     private List<CarReceiver> carListeners;
     private List<TrafficLightReceiver> trafficLightListeners;
+    private SimpleDateFormat format;
   
     public Packet(MoteIF moteIF) {
 	this.moteIF = moteIF;
 	this.moteIF.registerListener(new VehicleMsg(), this);
 	this.moteIF.registerListener(new TrafficLightMsg(), this);
+	Message ackMsg = new VehicleMsg();
+	ackMsg.amTypeSet(0x0E);
+	this.moteIF.registerListener(ackMsg, this);
+	this.format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.S");
 	this.carListeners = new ArrayList<CarReceiver>();
 	this.trafficLightListeners = new ArrayList<TrafficLightReceiver>();
     }
@@ -23,7 +29,8 @@ public class Packet implements MessageListener, ITSSender {
 	boolean success = false;
 	while (!success) {
 	    try {
-		System.out.println("Sending packet " + msg);
+		Date current = new Date();
+		System.out.println(this.format.format(current) + ": sending packet " + msg);
 		moteIF.send(id, msg);
 		success = true;
 	    } catch (IOException e) {
@@ -40,7 +47,10 @@ public class Packet implements MessageListener, ITSSender {
     }
 
     public void messageReceived(int to, Message message) {
-	if (message.amType() == (new VehicleMsg()).amType()) {
+	if (message.amType() == 0x0E) {
+	    Date current = new Date();
+	    System.out.println(this.format.format(current) + ": received ack for packet: " + message);
+	} else if (message.amType() == (new VehicleMsg()).amType()) {
 	    VehicleMsg msg = (VehicleMsg)message;
 	    SerialPacket serialMsg = message.getSerialPacket();
 	    //System.out.println("Received packet " + msg + " Serial packet " + serialMsg);

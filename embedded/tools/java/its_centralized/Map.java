@@ -272,7 +272,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	car.switchTo(end);
         	car.status = Car.TRANSIT;
             }
-            System.out.println(car);
+            System.out.println(car.freshness + ": " + car);
         }
         this.checkCar(car);
         this.checkStoppedCars(car);

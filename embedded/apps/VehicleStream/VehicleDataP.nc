@@ -102,6 +102,7 @@ module VehicleDataP {
         if (recvBufIdx == sizeof(vehicle_receive_t)) {
           if (recvBuf.speed)
             counter = 0;
+          call Leds.led1Toggle();
           enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
           post receiveQueueTask();
         }

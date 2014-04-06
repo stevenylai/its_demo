@@ -98,12 +98,12 @@ module TrafficLightDataP {
           uint8_t real_dir = recvBuf.dir >> 4 & 0x03;
           uint8_t real_color = recvBuf.dir & 0x03;
           sendBuf.id = recvBuf.id;
-          //if (aliveTimer >= ALIVE_TIMEOUT || (real_dir < DIR_TOTAL && lightColor[real_dir] != real_color)) {
+          if (aliveTimer >= ALIVE_TIMEOUT || (real_dir < DIR_TOTAL && lightColor[real_dir] != real_color)) {
             enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
             post receiveQueueTask();
             lightColor[real_dir] = real_color;
             aliveTimer = 0;
-          //}
+          }
         }
       } else { /* Ignored */ }
     } // atomic
