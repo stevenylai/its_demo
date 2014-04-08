@@ -47,8 +47,8 @@ public class MessageDispatcher implements Runnable{
 		Date current = new Date();
 		if (current.getTime() - this.dispatchList.get(i).car.belongs.lastExit.getTime() >= Map.SAFE_EXIT_INTERVAL) {
 		    System.out.println("Dispatching car: " + this.dispatchList.get(i).car + " at " + current);
-		    this.map.startCar(this.dispatchList.get(i).car);
-		    this.map.turnCar(this.dispatchList.get(i).car, this.dispatchList.get(i).exit);
+		    this.dispatchList.get(i).car.start();
+		    this.dispatchList.get(i).car.turn(this.dispatchList.get(i).exit);
 		    System.out.println("Road " + this.dispatchList.get(i).exit + ". lastExit: " + this.dispatchList.get(i).exit.lastExit + " this exit " + current);
 		    this.dispatchList.get(i).car.belongs.lastExit = current;
 		    break;
