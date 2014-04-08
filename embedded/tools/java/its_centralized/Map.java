@@ -142,7 +142,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
             } else // If no cross road, just try start the car
         	tryToStartCar = true;
             if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
-        	Road exit = car.belongs.chooseExit();
+        	Road exit = car.belongs.chooseExit(true);
         	if (exit != null)
         	    System.out.println("Exit road at: " + current + ", previous exit time: " + car.belongs.lastExit);
         	if (exit == null) { // All exit roads are full, stop the car

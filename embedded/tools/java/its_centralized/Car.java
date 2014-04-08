@@ -10,6 +10,7 @@ class Car {
     public boolean stopped;
     public Road from;
     public Road belongs;
+    public Road to;
     public int speed;
     public int status;
     public Date freshness;

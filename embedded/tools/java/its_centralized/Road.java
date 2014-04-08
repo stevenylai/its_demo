@@ -6,6 +6,7 @@ class Road {
     public int capacity;
     public Date lastExit;
     public List <Car> cars;
+    public List <Car> planned;
     public Dictionary <Integer, Road> exitRoads;
     public CrossRoad cross;
     public TrafficLight trafficLight;
@@ -17,6 +18,7 @@ class Road {
 	this.trafficLight = null;
 	this.lastExit = new Date();
 	this.cars = new ArrayList<Car>();
+	this.planned = new ArrayList<Car>();
 	this.exitRoads = new Hashtable <Integer, Road>();
     }
     public void setTrafficLight (TrafficLight light, int dir) {
@@ -44,20 +46,25 @@ class Road {
 	    }
 	}
     }
-    public Road chooseExit () {
+    public Road chooseExit (boolean allowNull) {
+	Road best = null;
 	List<Road> avail = new ArrayList<Road>();
 	for (Enumeration<Road> e = this.exitRoads.elements(); e.hasMoreElements();) {
 	    Road candidate = e.nextElement();
 	    if (candidate.capacity > candidate.cars.size()) {
 		//System.out.println("Capacity of " + candidate + ": " + candidate.capacity + ", currently used: " + candidate.cars.size() + ": " + candidate.cars);
 		avail.add(candidate);
+	    } else if (best == null || (candidate.cars.size() - candidate.capacity) < (best.cars.size() - best.capacity)) {
+		best = candidate;
 	    }
 	}
 	if (avail.size() > 0) {
 	    Random rand = new Random();
 	    return avail.get(rand.nextInt(avail.size()));
-	} else
+	} else if (allowNull)
 	    return null;
+	else
+	    return best;
     }
     public String toString() {
 	return "Road: " + Integer.toString(this.startIC) + ", " + Integer.toString(this.endIC);
