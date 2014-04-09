@@ -141,34 +141,41 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	}
             } else // If no cross road, just try start the car
         	tryToStartCar = true;
+
             if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
-        	Road exit = car.belongs.chooseExit(true);
-        	if (exit != null)
-        	    System.out.println("Exit road at: " + current + ", previous exit time: " + car.belongs.lastExit);
-        	if (exit == null) { // All exit roads are full, stop the car
+		if (car.to == null) { // Get an exit if none yet
+		    car.to = car.belongs.chooseExit(true);
+		    if (car.to != null) {
+			car.turn(car.to);
+			System.out.println(car.toString() + " is instructed to switch to " + car.to.toString());
+		    }
+		}
+
+		if (car.to == null || car.to.capacity <= car.to.cars.size()) {
         	    System.out.println(car.toString() + " is stopped because there is no exit available");
         	    car.stop();
-        	} else if (current.getTime() - car.belongs.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
+		} else if (current.getTime() - car.belongs.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
         	    System.out.println(car.toString() + " is running too close to the previous car. Trying to pause it");
         	    car.stop();
-        	    this.dispatcher.addCar(car, current, exit);
-        	} else {
-        	    System.out.println(car.toString() + " is instructed to switch to " + exit.toString());
+        	    this.dispatcher.addCar(car, current, car.to);
+		} else {
+		    System.out.println("Exit road at: " + current + ", previous exit time: " + car.belongs.lastExit);
         	    if (car.stopped) {
         		car.start();
-        		car.turn(exit);
-        		System.out.println("Road " + exit.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
+        		System.out.println("Road " + car.to.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
         		car.belongs.lastExit = current;
         		//this.dispatcher.addCar(car, current, exit);
         	    } else {
         		car.start();
-        		car.turn(exit);
-        		System.out.println("Road " + exit.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
+        		System.out.println("Road " + car.to.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
         		car.belongs.lastExit = current;
         	    }
-        	}
+		}
             }
         } else {
+	    car.to = car.belongs.chooseExit(false);
+	    System.out.println(car.toString() + " is instructed to switch to " + car.to.toString());
+	    car.turn(car.to);
         }
     }
     private boolean stateIsUnchanged (Car car, Road in, Road out) {
