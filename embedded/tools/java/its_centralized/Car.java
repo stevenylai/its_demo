@@ -54,10 +54,10 @@ class Car {
             Integer turn = e.nextElement();
             if (this.belongs.exitRoads.get(turn) == road) {
         	if (turn.intValue() == 1) { // 1: straight - no need to turn
-        	    this.setDir(0);
+        	    this.setDirIC(0, this.belongs.endIC);
         	    this.lastControl = new Date();
         	} else {
-        	    this.setDir(1);
+        	    this.setDirIC(1, this.belongs.endIC);
         	    this.lastControl = new Date();
         	}
         	 
@@ -79,6 +79,13 @@ class Car {
 	this.sender.sendPacket(this.id, cmd);
     }
 
+    public void setDirIC(int dir, int IC) {
+	VehicleMsg cmd = new VehicleMsg();
+	cmd.set_dir((short)dir);
+	cmd.set_speed((short)0x10);
+	cmd.set_icnum((short)IC);
+	this.sender.sendPacket(this.id, cmd);
+    }
     public void remove() {
 	if (this.belongs.cross != null) {
 	    this.belongs.cross.waiting.remove(this);

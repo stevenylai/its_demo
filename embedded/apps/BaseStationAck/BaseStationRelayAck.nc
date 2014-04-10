@@ -327,7 +327,7 @@ implementation
         memcpy(uartAckPtr, msg, sizeof(message_t));
         payload_len = call RadioPacket.payloadLength(uartAckPtr);
         //call RadioAMPacket.type(uartAckPtr);
-        call RadioAMPacket.setType(uartAckPtr, AM_ACK);
+        call RadioAMPacket.setType(uartAckPtr, ~(call RadioAMPacket.type(msg)));
         uartAckPtr = receive(uartAckPtr, call RadioPacket.getPayload(uartAckPtr, payload_len), payload_len);
       }
     }
