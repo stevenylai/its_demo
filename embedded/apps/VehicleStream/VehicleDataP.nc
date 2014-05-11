@@ -74,6 +74,7 @@ module VehicleDataP {
 
   command error_t VehicleData.send(VehicleMsg *msg) {
     atomic {
+      sendBuf.id = recvBuf.id;
       sendBuf.speed = msg->speed;
       sendBuf.dir = msg->dir;
       sendBuf.icnum = msg->icnum;

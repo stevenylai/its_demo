@@ -57,6 +57,8 @@
 #include "AM.h"
 #include "Serial.h"
 
+#define MAX_RETRIAL 128 
+
 module BaseStationP @safe() {
   uses {
     interface Boot;
@@ -84,7 +86,6 @@ implementation
   enum {
     UART_QUEUE_LEN = 12,
     RADIO_QUEUE_LEN = 12,
-    MAX_RETRIAL = 128,
   };
 
   message_t  uartQueueBufs[UART_QUEUE_LEN];
@@ -307,7 +308,7 @@ implementation
   event void RadioSend.sendDone[am_id_t id](message_t* msg, error_t error) {
     if (error != SUCCESS)
       failBlink();
-    else if (!(call RadioAck.wasAcked(msg)) && retrialCount < MAX_RETRIAL) {
+    else if (!(call RadioAck.wasAcked(msg)) && (MAX_RETRIAL == 0 || retrialCount < MAX_RETRIAL)) {
       failBlink();
       atomic retrialCount++;
     } else {

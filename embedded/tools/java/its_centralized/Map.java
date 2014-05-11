@@ -143,13 +143,8 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	tryToStartCar = true;
 
             if (tryToStartCar || !car.stopped) { // Before starting, need to make sure there is a valid exit
-		if (car.to == null) { // Get an exit if none yet
-		    car.to = car.belongs.chooseExit(true);
-		    if (car.to != null) {
-			car.turn(car.to);
-			System.out.println(car.toString() + " is instructed to switch to " + car.to.toString());
-		    }
-		}
+		if (!car.exitPrepared())// Get an exit if none yet
+		    car.prepareExit(true);
 
 		if (car.to == null || car.to.capacity <= car.to.cars.size()) {
         	    System.out.println(car.toString() + " is stopped because there is no exit available");
@@ -172,11 +167,8 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	    }
 		}
             }
-        } else {
-	    car.to = car.belongs.chooseExit(false);
-	    System.out.println(car.toString() + " is instructed to switch to " + car.to.toString());
-	    car.turn(car.to);
-        }
+        } else
+	    car.prepareExit(false);
     }
     private boolean stateIsUnchanged (Car car, Road in, Road out) {
         if (car.status == Car.ENTERING && car.belongs == in) {
@@ -240,7 +232,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
             if (pos == 0)
         	System.err.println("Waiting for data for car: " + carID);
             else
-        	System.out.println("Invalid pos: " + pos + "reported from car: " + carID);
+        	System.out.println("Invalid pos: " + pos + " reported from car: " + carID);
             return;
         }
         if (car == null) {

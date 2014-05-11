@@ -64,6 +64,24 @@ class Car {
             }
         }
     }
+    public void prepareExit(boolean allowNull) {
+	this.to = this.belongs.chooseExit(allowNull);	
+	if (this.to != null) {
+	    System.out.println(this.toString() + " is instructed to switch to " + this.to.toString());
+	    this.turn(this.to);
+	}
+    }
+    public boolean exitPrepared() {
+	if (this.to == null)
+	    return false;
+	
+	for (Enumeration<Road> e = this.belongs.exitRoads.elements(); e.hasMoreElements();) {
+	    Road road = e.nextElement();
+	    if (road.startIC == this.to.startIC && road.endIC == this.to.endIC)
+		return true;
+	}
+	return false;
+    }
     public void setSpeed(int speed) {
 	VehicleMsg cmd = new VehicleMsg();
 	cmd.set_dir((short)0x00);
