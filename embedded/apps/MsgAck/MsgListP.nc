@@ -24,9 +24,11 @@ module MsgListP {
     for (i = 0; i < msgList.used; i++) {
       msgList.msgs[i].tick++;
       if (msgList.msgs[i].tick > RESEND_TICK) {
-        signal msgList.resend(msgList.msgs + i);
-        msgList.msgs[i].retrial++;
-        msgList.msgs[i].tick = 0;
+        bool resent = signal msgList.resend(msgList.msgs + i);
+        if (resent) {
+          msgList.msgs[i].retrial++;
+          msgList.msgs[i].tick = 0;
+        }
       }
     }
   }
@@ -65,6 +67,7 @@ module MsgListP {
     } else
       return FAIL;
   }
+
   command void MsgList.remove(message_t * msg) {
     uint8_t i;
     bool alreadyExists = FALSE;

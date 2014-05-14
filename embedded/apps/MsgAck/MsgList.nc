@@ -8,5 +8,5 @@ interface MsgList {
   command error_t add(mesage_t * msg);
   command void remove(message_t * msg);
   command msg_info_t * get(uint8_t idx);
-  event void resend(msg_info_t * msgInfo);
+  event bool resend(msg_info_t * msgInfo);
 }
