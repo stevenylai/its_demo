@@ -82,6 +82,10 @@ module ActiveMessageAckP {
   default event void AckSend.sendDone[am_id_t id](message_t* message, error_t error) {
   }
 
+  default event message_t* AckReceive.receive[am_id_t id](message_t* msg, void* payload, uint8_t len) {
+    return msg;
+  }
+
   event void RadioSend.sendDone[am_id_t id](message_t* msg, error_t error) {
     msgBusy = FALSE;
     if (!queue_empty(&msg_queue))
@@ -99,6 +103,7 @@ module ActiveMessageAckP {
       enqueue(&msg_queue, &reply);
       if (!msgBusy)
 	post msgQueueTask();
+      signal AckReceive.receive[id](msg, payload, len - ACK_HEAD_LEN);
     } else {
       uint8_t i;
       am_addr_t src = call RadioAMPacket.source(msg);
