@@ -1,14 +1,15 @@
-#ifndef ACTIVE_MESSAGE_ACK_H
-#define ACTIVE_MESSAGE_ACK_H
+#ifndef MSG_LIST_H
+#define MSG_LIST_H
 
 #include "AM.h"
 #define ACK_QUEUE_LEN 16
 #define RESEND_TICK 4
 
-struct msg_info {
+typedef struct msg_info {
   message_t msg;
-  amd_id_t am_id;
+  am_id_t am_id;
   am_addr_t dest;
+  uint8_t len;
   uint8_t retrial;
   uint8_t tick;
 } msg_info_t;
