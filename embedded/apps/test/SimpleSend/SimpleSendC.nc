@@ -7,12 +7,13 @@ configuration SimpleSendC {
   components LedsC;
 
   SimpleSendP.Boot -> MainC.Boot;
+  ActiveMessageAckC.Boot -> MainC.Boot;
   SimpleSendP.SplitControl -> ActiveMessageAckC.SplitControl;
-  SimpleSendP.Timer -> Timer;
+
   SimpleSendP.AMSend -> ActiveMessageAckC.AMSend[AM_SIMPLE_SEND];
   SimpleSendP.Packet -> ActiveMessageAckC.Packet;
   SimpleSendP.AMPacket -> ActiveMessageAckC.AMPacket;
-  SimpleSendP.Leds -> LedsC;
 
-  ActiveMessageAckC.Boot -> MainC.Boot;
+  SimpleSendP.Timer -> Timer;
+  SimpleSendP.Leds -> LedsC;
 }

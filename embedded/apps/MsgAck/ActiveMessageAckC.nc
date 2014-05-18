@@ -14,6 +14,7 @@ configuration ActiveMessageAckC {
 } implementation {
   components ActiveMessageAckP, MsgListC;
   components ActiveMessageC;
+  components LedsC;
   
   SplitControl = ActiveMessageC.SplitControl;
   Snoop = ActiveMessageC.Snoop;
@@ -24,6 +25,7 @@ configuration ActiveMessageAckC {
   Receive = ActiveMessageAckP.AckReceive;
   Boot = ActiveMessageAckP.Boot;
 
+  ActiveMessageAckP.Leds -> LedsC;
   ActiveMessageAckP.MsgList -> MsgListC;
   ActiveMessageAckP.RadioPacket -> ActiveMessageC.Packet;
   ActiveMessageAckP.RadioAMPacket -> ActiveMessageC.AMPacket;
