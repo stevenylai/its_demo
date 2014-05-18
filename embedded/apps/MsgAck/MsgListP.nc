@@ -19,7 +19,7 @@ module MsgListP {
     msgList.capacity = ACK_QUEUE_LEN;
     msgList.used = 0;
     last_check = 0;
-    call Timer.startPeriodic(100);
+    call Timer.startPeriodic(20);
   }
 
   event void Timer.fired() {

@@ -18,7 +18,7 @@ module SimpleSendP {
   }
 
   event void SplitControl.startDone(error_t error) {
-    call Timer.startPeriodic(500);
+    call Timer.startPeriodic(100);
     //call Timer.startOneShot(500);
   }
 
@@ -27,11 +27,10 @@ module SimpleSendP {
   }
 
   event void Timer.fired() {
-    //call Leds.led1Toggle();
     uint8_t * payload = (uint8_t *)call AMSend.getPayload(&msg, sizeof(counter));
+    call Leds.led1Toggle();
     memcpy(payload, &counter, sizeof(counter));
     if ((call AMSend.send(0x0, &msg, sizeof(counter))) == SUCCESS) {
-      call Leds.led1Toggle();
       counter--;
       if (!counter)
 	counter = 0xFF;

@@ -79,7 +79,8 @@ configuration BaseStationC {
 }
 implementation {
   components MainC, BaseStationP, LedsC;
-  components ActiveMessageC as Radio, VehicleAmC as Serial;
+  components ActiveMessageC as Radio;
+  components VehicleAmC as Serial;
   
   MainC.Boot <- BaseStationP;
 

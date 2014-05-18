@@ -2,14 +2,16 @@
 
 configuration SimpleReceiveC {
 } implementation {
-  components MainC, SimpleReceiveP, ActiveMessageAckC;
+  components MainC, SimpleReceiveP;
+  //components ActiveMessageC;
+  components ActiveMessageAckC as ActiveMessageC;
   components LedsC;
 
   SimpleReceiveP.Boot -> MainC.Boot;
-  ActiveMessageAckC.Boot -> MainC.Boot;
-  SimpleReceiveP.SplitControl -> ActiveMessageAckC.SplitControl;
+  ActiveMessageC.Boot -> MainC.Boot;
+  SimpleReceiveP.SplitControl -> ActiveMessageC.SplitControl;
 
-  SimpleReceiveP.Receive -> ActiveMessageAckC.Receive[AM_SIMPLE_SEND];
-  SimpleReceiveP.AMPacket -> ActiveMessageAckC.AMPacket;
+  SimpleReceiveP.Receive -> ActiveMessageC.Receive[AM_SIMPLE_SEND];
+  SimpleReceiveP.AMPacket -> ActiveMessageC.AMPacket;
   SimpleReceiveP.Leds -> LedsC;
 }

@@ -11,18 +11,21 @@ enum {
 
 struct msg_queue {
   msg_info_t buffer[MSG_QUEUE_LEN];
-  int head;
-  int tail;
+  uint8_t head;
+  uint8_t tail;
 };
 
 static void queue_clear(struct msg_queue * queue) {
   queue->head = queue->tail = 0;
 }
+static bool queue_full(struct msg_queue * queue) {
+  return (queue->tail + 1) % MSG_QUEUE_LEN == queue->head;
+}
 static bool queue_empty(struct msg_queue * queue) {
   return queue->head == queue->tail;
 }
 static void enqueue(struct msg_queue * queue, msg_info_t *item) {
-  if ((queue->tail + 1) % MSG_QUEUE_LEN == queue->head) { // Queue is full so make room first
+  if (queue_full(queue)) { // Queue is full so make room first
     queue->head = (queue->head + 1) % MSG_QUEUE_LEN;
   }
   memcpy(queue->buffer + queue->tail, item, sizeof(msg_info_t));

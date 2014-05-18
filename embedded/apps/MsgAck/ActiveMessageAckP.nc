@@ -33,7 +33,7 @@ module ActiveMessageAckP {
       if (call RadioSend.send[cur_msg.am_id](cur_msg.dest, &cur_msg.msg, cur_msg.len) != SUCCESS) {
 	//call Leds.led0Toggle();
 	enqueue(&msg_queue, &cur_msg);
-	msgBusy = FALSE;
+	post msgQueueTask();
       } else {
 	call Leds.led2On();
       }
@@ -63,7 +63,8 @@ module ActiveMessageAckP {
       if (!payload) {
         return FAIL;
       }
-      payload[0] = MESSAGE_TYPE_SEND << 7 | (seq++);
+      payload[0] = 0x7F & seq;
+      seq = (seq + 1) % 128;
       memcpy(&item.msg, msg, sizeof(message_t));
       item.am_id = id;
       item.dest = addr;

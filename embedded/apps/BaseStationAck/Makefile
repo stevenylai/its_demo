@@ -1,4 +1,4 @@
 COMPONENT=BaseStationC
 #CFLAGS+=-I../Vehicle
-CFLAGS+=-v
+CFLAGS+=-I../MsgAck -v
 include $(MAKERULES)

@@ -80,10 +80,12 @@ configuration BaseStationC {
 implementation {
   components MainC, LedsC;
   //components BaseStationP;
-  components BaseStationRelayAck as BaseStationP;
-  components ActiveMessageC as Radio, SerialActiveMessageC as Serial;
+  components BaseStationP;
+  components ActiveMessageAckC as Radio;
+  components SerialActiveMessageC as Serial;
   
   MainC.Boot <- BaseStationP;
+  MainC.Boot <- Radio;
 
   BaseStationP.RadioControl -> Radio;
   BaseStationP.SerialControl -> Serial;
@@ -94,7 +96,7 @@ implementation {
   BaseStationP.UartAMPacket -> Serial;
   
   BaseStationP.RadioSend -> Radio;
-  BaseStationP.RadioAck -> Radio;
+  //BaseStationP.RadioAck -> Radio;
   BaseStationP.RadioReceive -> Radio.Receive;
   BaseStationP.RadioSnoop -> Radio.Snoop;
   BaseStationP.RadioPacket -> Radio;

@@ -3,7 +3,7 @@
 
 #include "AM.h"
 #define ACK_QUEUE_LEN 16
-#define RESEND_TICK 4
+#define RESEND_TICK 3
 
 typedef struct msg_info {
   message_t msg;
