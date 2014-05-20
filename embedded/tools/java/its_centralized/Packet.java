@@ -53,7 +53,8 @@ public class Packet implements MessageListener, ITSSender, Runnable {
 	this.checkTimeout.start();
     }
     public void sendPacket(int id, Message msg) {
-	this.sendPacket(id, msg, true);
+	//this.sendPacket(id, msg, true);
+	this.sendPacket(id, msg, false);
     }
     private void sendPacket(int id, Message msg, boolean addToPending) {
 	boolean success = false;

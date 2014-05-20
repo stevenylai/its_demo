@@ -79,10 +79,12 @@ configuration BaseStationC {
 }
 implementation {
   components MainC, BaseStationP, LedsC;
-  components ActiveMessageC as Radio;
+  //components ActiveMessageC as Radio;
+  components ActiveMessageAckC as Radio;
   components VehicleAmC as Serial;
   
   MainC.Boot <- BaseStationP;
+  MainC.Boot <- Radio;
 
   BaseStationP.RadioControl -> Radio;
   BaseStationP.SerialControl -> Serial;
@@ -93,7 +95,7 @@ implementation {
   BaseStationP.UartAMPacket -> Serial;
   
   BaseStationP.RadioSend -> Radio;
-  BaseStationP.RadioAck -> Radio;
+  //BaseStationP.RadioAck -> Radio;
   BaseStationP.RadioReceive -> Radio.Receive;
   BaseStationP.RadioSnoop -> Radio.Snoop;
   BaseStationP.RadioPacket -> Radio;
