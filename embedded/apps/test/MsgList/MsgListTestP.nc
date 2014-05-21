@@ -22,9 +22,9 @@ module MsgListTestP {
   }
   event void Boot.booted() {
     counter = 1;
-    dbg("Boot", "Application booted.\n");
     call MsgList.init();
-    call Timer.startPeriodic(1000);
+    dbg("Timer", "Timer started.\n");
+    call Timer.startPeriodic(10);
   }
   
   event bool MsgList.resend(msg_info_t * msgInfo) {
@@ -32,6 +32,7 @@ module MsgListTestP {
   }
 
   event void Timer.fired() {
+    dbg("Timer", "Timer fired.\n");
     counter++;
   }
 
