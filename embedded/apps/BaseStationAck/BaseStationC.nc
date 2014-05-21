@@ -78,7 +78,7 @@
 configuration BaseStationC {
 }
 implementation {
-  components MainC, LedsC;
+  components MainC, NoLedsC as LedsC;
   //components BaseStationP;
   components BaseStationP;
   components ActiveMessageAckC as Radio;

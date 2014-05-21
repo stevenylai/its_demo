@@ -134,12 +134,11 @@ module ActiveMessageAckP {
 
   event message_t* RadioReceive.receive[am_id_t id](message_t* msg, void* payload, uint8_t len) {
     uint8_t *ack_head = (uint8_t *)payload;
-    //call Leds.led2Toggle();
     if ((*ack_head >> 7) == MESSAGE_TYPE_SEND) {
-      if ((call RadioAMPacket.address()) == (call RadioAMPacket.destination(msg))) {
+      if (call RadioAMPacket.isForMe(msg)) {
 	msg_info_t reply;
 	uint8_t * reply_payload = (uint8_t *)call RadioPacket.getPayload(&reply.msg, ACK_HEAD_LEN);
-	*reply_payload = *ack_head | (MESSAGE_TYPE_ACK << 7);
+	*reply_payload = (*ack_head | 0x80);
 	reply.am_id = id;
 	reply.dest = call RadioAMPacket.source(msg);
 	reply.len = ACK_HEAD_LEN;
@@ -148,13 +147,16 @@ module ActiveMessageAckP {
 	  msgBusy = TRUE;
 	  post msgQueueTask();
 	}
-	msg = signal AckReceive.receive[id](msg, payload + ACK_HEAD_LEN, len - ACK_HEAD_LEN);
+	call Leds.led1Toggle();
+	memmove(payload, ((uint8_t *)payload) + ACK_HEAD_LEN, len - ACK_HEAD_LEN);
+	call RadioPacket.setPayloadLength(msg, len - ACK_HEAD_LEN);
+	msg = signal AckReceive.receive[id](msg, payload, len - ACK_HEAD_LEN);
       }
     } else { // ACK
       uint8_t i;
       am_addr_t src = call RadioAMPacket.source(msg);
       am_id_t am_type = id;
-      //call Leds.led0Toggle();
+      call Leds.led1Toggle();
       for (i = 0; i < (call MsgList.size()); i++) {
 	msg_info_t * msg_info = call MsgList.get(i);
 	if (src == msg_info->dest && am_type == msg_info->am_id) {

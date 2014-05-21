@@ -14,6 +14,7 @@ configuration ActiveMessageAckC {
 } implementation {
   components ActiveMessageAckP, MsgListC;
   components ActiveMessageC;
+  //components NoLedsC as LedsC;
   components LedsC;
   
   SplitControl = ActiveMessageC.SplitControl;
