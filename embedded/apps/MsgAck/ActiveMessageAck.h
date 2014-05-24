@@ -6,7 +6,7 @@ enum {
   MESSAGE_TYPE_SEND = 0,
   MESSAGE_TYPE_ACK = 1,
   ACK_HEAD_LEN = 1,
-  MSG_QUEUE_LEN = 8,
+  MSG_QUEUE_LEN = 4,
 };
 
 struct msg_queue {

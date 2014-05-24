@@ -17,6 +17,8 @@ module MsgListP {
   }
   static void debug_dump(){
     uint8_t i;
+    if (msgList.used == 0)
+      return;
     dbg("MsgList", "Current list:\n");
     for (i = 0; i < msgList.used; i++) {
       dbg("MsgList", "\t am: %d, dest: %d, len: %d, retrial: %d, tick: %d\n",

@@ -4,12 +4,10 @@ configuration ActiveMessageAckC {
 
     interface AMSend[am_id_t id];
     interface Receive[am_id_t id];
-    interface Receive as Snoop[am_id_t id];
+    //interface Receive as Snoop[am_id_t id];
 
     interface Packet;
     interface AMPacket;
-  } uses {
-    interface Boot;
   }
 } implementation {
   components ActiveMessageAckP, MsgListC;
@@ -17,17 +15,17 @@ configuration ActiveMessageAckC {
   //components NoLedsC as LedsC;
   components LedsC;
   
-  SplitControl = ActiveMessageC.SplitControl;
-  Snoop = ActiveMessageC.Snoop;
+  SplitControl = ActiveMessageAckP.SplitControl;
+  //Snoop = ActiveMessageC.Snoop;
   Packet = ActiveMessageC.Packet;
   AMPacket = ActiveMessageC.AMPacket;
 
   AMSend = ActiveMessageAckP.AckSend;
   Receive = ActiveMessageAckP.AckReceive;
-  Boot = ActiveMessageAckP.Boot;
 
   ActiveMessageAckP.Leds -> LedsC;
   ActiveMessageAckP.MsgList -> MsgListC;
+  ActiveMessageAckP.RadioControl -> ActiveMessageC.SplitControl;
   ActiveMessageAckP.RadioPacket -> ActiveMessageC.Packet;
   ActiveMessageAckP.RadioAMPacket -> ActiveMessageC.AMPacket;
   ActiveMessageAckP.RadioSend -> ActiveMessageC.AMSend;
