@@ -34,9 +34,19 @@ module MsgListTestP {
   event void Timer.fired() {
     dbg("Timer", "Timer fired.\n");
     counter++;
+    if (counter > 4)
+      return;
+    else
+      add_msg();
+    /*
+    if (counter % 3 == 0)
+      remove_msg_by_info();
+    else
+      add_msg();
+    */
   }
 
   event void AMSend.sendDone(message_t* msg, error_t error) {
-    /* Not used */
+    /* Noting is sent */
   }
 }

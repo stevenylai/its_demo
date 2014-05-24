@@ -15,6 +15,15 @@ module MsgListP {
         memcpy(msgList.msgs+(i-1), msgList.msgs+i, sizeof(struct msg_info));
       msgList.used--;
   }
+  static void debug_dump(){
+    uint8_t i;
+    dbg("MsgList", "Current list:\n");
+    for (i = 0; i < msgList.used; i++) {
+      dbg("MsgList", "\t am: %d, dest: %d, len: %d, retrial: %d, tick: %d\n",
+	  msgList.msgs[i].am_id, msgList.msgs[i].dest, msgList.msgs[i].len,
+	  msgList.msgs[i].retrial, msgList.msgs[i].tick);
+    }
+  }
   command void MsgList.init() {
     msgList.capacity = ACK_QUEUE_LEN;
     msgList.used = 0;
@@ -42,6 +51,7 @@ module MsgListP {
       last_check = i;
     else
       last_check = 0;
+    debug_dump();
   }
 
   command bool MsgList.full() {
@@ -74,8 +84,10 @@ module MsgListP {
       msgList.msgs[msgList.used].tick = 0;
       memcpy(&msgList.msgs[msgList.used].msg, msg, sizeof(message_t));
       msgList.used++;
+      debug_dump();
       return SUCCESS;
     } else {
+      debug_dump();
       return FAIL;
     }
   }
@@ -91,6 +103,7 @@ module MsgListP {
     if (alreadyExists) {
       shift_left(i+1);
     }
+    debug_dump();
   }
   command void MsgList.removeByMsg(message_t * msg) {
     uint8_t i;
@@ -104,6 +117,7 @@ module MsgListP {
     if (alreadyExists) {
       shift_left(i+1);
     }
+    debug_dump();
   }
 
   command msg_info_t * MsgList.get(uint8_t idx) {
