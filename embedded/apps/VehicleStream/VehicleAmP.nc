@@ -43,6 +43,7 @@ module VehicleAmP {
   task void receiveMsgTask() {
     call Leds.led0Toggle();
     call SerialAMPacket.setSource(recvAmPtr, call ActiveMessageAddress.amAddress());
+    //call SerialAMPacket.setSource(recvAmPtr, TOS_NODE_ID);
     call SerialAMPacket.setDestination(recvAmPtr, 0);
     call SerialAMPacket.setType(recvAmPtr, AM_VEHICLE_RECEIVE);
     call SerialAMPacket.setGroup(recvAmPtr, call SerialAMPacket.localGroup());

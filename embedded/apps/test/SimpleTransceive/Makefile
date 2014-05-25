@@ -1,4 +1,3 @@
-COMPONENT=SimpleSendC
-#COMPONENT=SimpleReceiveC
+COMPONENT=SimpleTransceiveC
 CFLAGS+=-I../../MsgAck #-v
 include $(MAKERULES)

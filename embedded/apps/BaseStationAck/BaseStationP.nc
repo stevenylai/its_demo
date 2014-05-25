@@ -278,6 +278,7 @@ implementation
     am_id_t id;
     am_addr_t addr,source;
     message_t* msg;
+    uint8_t *uart_payload, *radio_payload;
     
     atomic
       if (radioIn == radioOut && !radioFull)
@@ -294,6 +295,11 @@ implementation
 
     call RadioPacket.clear(msg);
     call RadioAMPacket.setSource(msg, source);
+    
+    uart_payload = (uint8_t *)call UartSend.getPayload[id](msg, len);
+    radio_payload = (uint8_t *)call RadioSend.getPayload[id](msg, len);
+    if (uart_payload != radio_payload)
+      memmove(radio_payload, uart_payload, len);
     
     //call RadioAck.requestAck(msg);
     if (call RadioSend.send[id](addr, msg, len) == SUCCESS)

@@ -34,12 +34,12 @@ module MsgAckTestP {
   }
 
   event void Timer.fired() {
-    if (TOS_NODE_ID == 0)
-      dbg("Timer", "Timer fired\n");
-    else {
+    if (TOS_NODE_ID == 0) {
+      //dbg("Timer", "Timer fired\n");
+    } else {
       void * payload = call AMSend.getPayload(msgptr, sizeof(counter));
       memcpy(payload, &counter, sizeof(counter));
-      if ((call AMSend.send(AM_BROADCAST_ADDR, msgptr, sizeof(counter))) != SUCCESS) {
+      if ((call AMSend.send(0, msgptr, sizeof(counter))) != SUCCESS) {
 	dbg("MsgAckTest", "Failed to send msg: %d, size: %d\n",
 	    counter, sizeof(counter));
       } else {

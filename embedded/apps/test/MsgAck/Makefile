@@ -1,3 +1,3 @@
 COMPONENT=MsgAckTestC
-#CFLAGS+=-I../../MsgAck #-v
+CFLAGS+=-I../../MsgAck #-v
 include $(MAKERULES)

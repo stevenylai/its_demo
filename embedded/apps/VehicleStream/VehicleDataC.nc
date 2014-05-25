@@ -6,8 +6,8 @@ configuration VehicleDataC {
 } implementation {
   components VehicleDataP, SerialActiveMessageC as Serial, PlatformSerialC;
   components new TimerMilliC();
-  components LedsC;
-  //components NoLedsC as LedsC;
+  //components LedsC;
+  components NoLedsC as LedsC;
 
   SplitControl = VehicleDataP;
   SplitControl = Serial;

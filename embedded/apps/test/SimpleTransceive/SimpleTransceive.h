@@ -1,0 +1,7 @@
+#ifndef SIMPLE_TRANSCEIVE_H
+#define SIMPLE_TRANSCEIVE_H
+
+enum {
+  AM_SIMPLE_TRANSCEIVE = 0x15,
+};
+#endif

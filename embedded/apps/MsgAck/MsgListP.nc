@@ -16,6 +16,7 @@ module MsgListP {
       msgList.used--;
   }
   static void debug_dump(){
+    /*
     uint8_t i;
     if (msgList.used == 0)
       return;
@@ -25,6 +26,7 @@ module MsgListP {
 	  msgList.msgs[i].am_id, msgList.msgs[i].dest, msgList.msgs[i].len,
 	  msgList.msgs[i].retrial, msgList.msgs[i].tick);
     }
+    */
   }
   command void MsgList.init() {
     msgList.capacity = ACK_QUEUE_LEN;
@@ -41,7 +43,10 @@ module MsgListP {
     for (i = last_check; i < msgList.used; i++) {
       msgList.msgs[i].tick++;
       if (msgList.msgs[i].tick > RESEND_TICK) {
-        bool resent = signal MsgList.resend(msgList.msgs + i);
+        bool resent;
+	dbg("MsgList", "Trying to resend msg. dest: %d, am: %d\n",
+	    msgList.msgs[i].dest, msgList.msgs[i].am_id);
+	resent = signal MsgList.resend(msgList.msgs + i);
 	msgList.msgs[i].retrial++;
 	msgList.msgs[i].tick = 0;
         if (!resent) {

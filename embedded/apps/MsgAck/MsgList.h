@@ -12,6 +12,7 @@ typedef struct msg_info {
   uint8_t len;
   uint8_t retrial;
   uint8_t tick;
+  message_t * origin_msg;
 } msg_info_t;
 
 struct msg_info_list {

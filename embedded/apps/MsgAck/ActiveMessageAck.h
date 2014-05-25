@@ -3,8 +3,8 @@
 
 #include "MsgList.h"
 enum {
-  MESSAGE_TYPE_SEND = 0,
-  MESSAGE_TYPE_ACK = 1,
+  MESSAGE_TYPE_SEND = 0x0,
+  MESSAGE_TYPE_ACK = 0x80,
   ACK_HEAD_LEN = 1,
   MSG_QUEUE_LEN = 4,
 };

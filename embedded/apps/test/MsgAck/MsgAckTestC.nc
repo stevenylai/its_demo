@@ -4,8 +4,8 @@ configuration MsgAckTestC {
   components MsgAckTestP;
   components new AMSenderC(3);
   components new AMReceiverC(3);
-  //components ActiveMessageAckC as ActiveMessageC;
-  components ActiveMessageC;
+  components ActiveMessageAckC as ActiveMessageC;
+  //components ActiveMessageC;
 
   MsgAckTestP.Boot -> MainC.Boot;
   MsgAckTestP.SplitControl -> ActiveMessageC.SplitControl;

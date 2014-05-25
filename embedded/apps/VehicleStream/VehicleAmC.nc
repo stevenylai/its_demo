@@ -11,8 +11,8 @@ configuration VehicleAmC {
   components VehicleAmP, ActiveMessageAddressC, SerialActiveMessageC as Serial;
   components SerialStartC;
   components VehicleDataC;
-  //components LedsC;
-  components NoLedsC as LedsC;
+  components LedsC;
+  //components NoLedsC as LedsC;
 
   SplitControl = VehicleAmP;
   SplitControl = VehicleDataC;
