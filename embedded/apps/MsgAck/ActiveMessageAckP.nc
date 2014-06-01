@@ -26,7 +26,7 @@ module ActiveMessageAckP {
   static void dump_queue(struct msg_queue * queue) {
     /*
     uint8_t i = queue->head;
-    dbg("MsgAck", "Pending msgs\n");
+    dbg("MsgAck", "Msg queue with head: %d, tail: %d\n", queue->head, queue->tail);
     while (i != queue->tail) {
       dbg("MsgAck", "\t am: %d, dest: %d, len: %d\n",
 	  queue->buffer[i].am_id,
@@ -122,7 +122,6 @@ module ActiveMessageAckP {
       payload[0] = MESSAGE_TYPE_SEND;
       seq = (seq + 1) % 128;
       memcpy(&buffer.msg, msg, sizeof(message_t));
-      buffer.origin_msg = msg;
       buffer.am_id = id;
       buffer.dest = addr;
       buffer.len = len + ACK_HEAD_LEN;
@@ -223,6 +222,7 @@ module ActiveMessageAckP {
       call Leds.led0Toggle();
       dbg("MsgAck", "RadioReceive ack. am: %d, src: %d, len: %d, head: 0x%x\n",
 	  id, src, len, *ack_head);
+
       for (i = 0; i < (call MsgList.size()); i++) {
 	msg_info_t * msg_info = call MsgList.get(i);
 	if ((msg_info->dest == src || msg_info->dest == AM_BROADCAST_ADDR)

@@ -31,7 +31,7 @@ module SimpleTransceiveP {
 
   event message_t* Receive.receive(message_t* message, void* payload, uint8_t len) {
     call Leds.led1Toggle();
-    dbg("SimpleTransceive", "Recivinging counter %d\n", *((uint8_t *)payload));
+    dbg("SimpleTransceive", "Receiving counter %d\n", *((uint8_t *)payload));
     return message;
   }
 

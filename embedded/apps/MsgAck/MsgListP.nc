@@ -84,6 +84,7 @@ module MsgListP {
     }
 
     if (!alreadyExists && msgList.used < msgList.capacity) {
+      msgList.msgs[msgList.used].origin_msg = msg;
       msgList.msgs[msgList.used].dest = dest;
       msgList.msgs[msgList.used].am_id = am_id;
       msgList.msgs[msgList.used].len = len;
