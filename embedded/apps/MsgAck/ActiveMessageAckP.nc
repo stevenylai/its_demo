@@ -146,7 +146,7 @@ module ActiveMessageAckP {
 
   command void* AckSend.getPayload[am_id_t id](message_t* msg, uint8_t len) {
     uint8_t * payload = (uint8_t *)call RadioPacket.getPayload(msg, len + ACK_HEAD_LEN);
-    payload[0] = MESSAGE_TYPE_SEND;
+    //payload[0] = MESSAGE_TYPE_SEND;
     return payload + ACK_HEAD_LEN;
   }
 

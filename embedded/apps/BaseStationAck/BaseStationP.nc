@@ -240,6 +240,16 @@ implementation
     post uartSendTask();
   }
 
+  static void uart_2_radio(message_t * msg, uint8_t len, am_id_t id) {
+    message_t backup;
+    uint8_t *uart_payload, *radio_payload;
+    memcpy(&backup, msg, sizeof(message_t));
+
+    uart_payload = (uint8_t *)call UartSend.getPayload[id](&backup, len);
+    radio_payload = (uint8_t *)call RadioSend.getPayload[id](msg, len);
+    memcpy(radio_payload, uart_payload, len);
+  }
+
   event message_t *UartReceive.receive[am_id_t id](message_t *msg,
 						   void *payload,
 						   uint8_t len) {
@@ -251,6 +261,7 @@ implementation
 	{
 	  reflectToken = TRUE;
 	  ret = radioQueue[radioIn];
+	  uart_2_radio(msg, len, id);
 	  radioQueue[radioIn] = msg;
 	  if (++radioIn >= RADIO_QUEUE_LEN)
 	    radioIn = 0;
@@ -272,13 +283,12 @@ implementation
     
     return ret;
   }
-
+ 
   task void radioSendTask() {
     uint8_t len;
     am_id_t id;
     am_addr_t addr,source;
     message_t* msg;
-    uint8_t *uart_payload, *radio_payload;
     
     atomic
       if (radioIn == radioOut && !radioFull)
@@ -295,11 +305,6 @@ implementation
 
     call RadioPacket.clear(msg);
     call RadioAMPacket.setSource(msg, source);
-    
-    uart_payload = (uint8_t *)call UartSend.getPayload[id](msg, len);
-    radio_payload = (uint8_t *)call RadioSend.getPayload[id](msg, len);
-    if (uart_payload != radio_payload)
-      memmove(radio_payload, uart_payload, len);
     
     //call RadioAck.requestAck(msg);
     if (call RadioSend.send[id](addr, msg, len) == SUCCESS)
