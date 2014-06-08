@@ -2,13 +2,13 @@ import javax.comm.*;
 import java.util.*;
 import java.io.*;
 
-public class ComTest {
+public class UART {
     public Enumeration portIdentifiers;
     public SerialPort port;
     public InputStream inStream;
     public OutputStream outStream;
 
-    public ComTest() {
+    public UART() {
 	this.portIdentifiers = CommPortIdentifier.getPortIdentifiers();
 	this.port = null;
 	this.inStream = null;
@@ -29,7 +29,7 @@ public class ComTest {
 	    return null;
 	}
 	try {
-	    this.port = (SerialPort) portId.open("ComTest", // Name of the application asking for the port 
+	    this.port = (SerialPort) portId.open("UART_Java", // Name of the application asking for the port 
 						 10000);   // Wait max. 10 sec. to acquire port
 	} catch(PortInUseException e) {
 	    System.err.println("Port already in use: " + e);
@@ -48,6 +48,14 @@ public class ComTest {
 	    return null;
 	}
 	return this.port;
+    }
+
+    public boolean available() {
+	int available = 0;
+	try {
+	    available = this.inStream.available();
+	} catch (IOException e) {}
+	return available > 0;
     }
 
     public int readBytes(byte[] b) {
@@ -79,7 +87,7 @@ public class ComTest {
 	return output;
     }
     public static void main(String[] args) {
-	ComTest test = new ComTest();
+	UART test = new UART();
 	byte [] input = new byte [] {(byte)0xFF, (byte)0x04, (byte)0x00, (byte)0x10, (byte)0x00, (byte)0x0A};
 	byte [] output = new byte[16];
 	if (test.open("COM2", 9600) != null) {
