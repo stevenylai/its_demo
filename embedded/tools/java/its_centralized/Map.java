@@ -224,6 +224,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
 	    System.err.println("Unknown traffic light id: " + id);
     }
     public synchronized void receiveCar (int carID, int dir, int pos, int speed) {
+	Date receivedDate = new Date();
         Road start = this.startRoads.get(new Integer(pos));
         Road end = this.endRoads.get(new Integer(pos));
         Car car = this.cars.get(new Integer(carID));
@@ -244,7 +245,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
             else
         	car.status = Car.TRANSIT;
             this.cars.put(new Integer(car.id), car);
-            car.switchTo(start==null?end:start);
+            car.switchTo(start==null?end:start, pos);
             System.err.print("Car: " + carID + " has been added.");
             this.dumpCarList();
         } else if (stateIsUnchanged(car, start, end)) {
@@ -260,15 +261,16 @@ class Map implements CarReceiver, TrafficLightReceiver{
             return;
         } else {
             car.freshness = new Date();
+	    car.updateReceived(receivedDate);
             this.dispatcher.removeCar(car);
             if (start == null) { // Preparing to exit a road
-        	car.switchTo(end);
+        	car.switchTo(end, pos);
         	car.status = Car.LEAVING;
             } else if (end == null) { // Entering a new road
-        	car.switchTo(start);
+        	car.switchTo(start, pos);
         	car.status = Car.ENTERING;
             } else {
-        	car.switchTo(end);
+        	car.switchTo(end, pos);
         	car.status = Car.TRANSIT;
             }
             System.out.println(car.freshness + ": " + car);

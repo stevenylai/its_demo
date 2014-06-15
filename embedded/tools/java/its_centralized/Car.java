@@ -15,6 +15,7 @@ class Car {
     public int status;
     public Date freshness;
     public Date lastControl;
+    public Date lastMsgReceived;
     public ITSSender sender;
     public Car (int id, ITSSender comm, Road belongs) {
 	this.id = id;
@@ -32,6 +33,9 @@ class Car {
 	} else {
 	    return this.belongs.endIC;
 	}
+    }
+    public void updateReceived(Date received) {
+	this.lastMsgReceived = received;
     }
     public void stop() {
 	if (!this.stopped) {
@@ -67,7 +71,15 @@ class Car {
     public void prepareExit(boolean allowNull) {
 	this.to = this.belongs.chooseExit(allowNull);	
 	if (this.to != null) {
-	    System.out.println(this.toString() + " is instructed to switch to " + this.to.toString());
+	    System.out.print(this.toString() + " is instructed to switch to " + this.to.toString());
+	    if (this.lastMsgReceived != null) {
+		Date current = new Date();
+		System.out.println(". Time spent in decision making: " +
+				   (current.getTime() - this.lastMsgReceived.getTime()) + 
+				   " ms");
+	    } else
+		System.out.println("");
+	    
 	    this.turn(this.to);
 	}
     }
@@ -110,7 +122,8 @@ class Car {
 	}
 	this.belongs.cars.remove(this);
     }
-    public void switchTo(Road newRoad) {
+    public void switchTo(Road newRoad, int newIC) {
+	int previousIC = this.getCurrentIC();
 	//System.out.println("Switching " + this.toString() + " to " + newRoad.toString());
 	if (this.belongs.cross != null) {
 	    //System.out.println("Removing car from the old intersection");
@@ -119,6 +132,14 @@ class Car {
 	if (newRoad != this.belongs) { // reset the state variables
 	    this.stopped = false;
 	    this.freshness = new Date();
+	}
+	if (newRoad != this.belongs && this.status != Car.TRANSIT) {
+	    if (newIC == newRoad.startIC && this.status == Car.ENTERING)
+		System.err.println("IC card " + this.belongs.endIC +
+				   " for Car: " + this.id + " is skipped");
+	    else if (newIC == newRoad.endIC)
+		System.err.println("IC card " + newRoad.startIC +
+				   " for Car: " + this.id + " is skipped");
 	}
 	this.belongs.cars.remove(this);
 	this.from = this.belongs;
