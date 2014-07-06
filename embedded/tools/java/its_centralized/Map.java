@@ -1,6 +1,8 @@
 import java.util.*;
+import java.util.logging.*;
 
 class Map implements CarReceiver, TrafficLightReceiver{
+    private static Logger LOGGER = Logger.getLogger(Map.class.getName());
     private static boolean debug = false;
     public Dictionary <Integer, Car> cars;
     public Dictionary <Integer, TrafficLight> trafficLights;
@@ -100,10 +102,12 @@ class Map implements CarReceiver, TrafficLightReceiver{
             this.checkCar(car);
         }
     }
-    private void printIntersectionCars(CrossRoad cross) {
+    private String intersectionCarString(CrossRoad cross) {
+	String msg = "";
         for (Car car : cross.waiting) {
-            System.out.print(car.id + " ");
+	    msg += car.id + " ";
         }
+	return msg;
     }
     private void checkCar (Car car) {
         boolean tryToStartCar = false;
@@ -114,7 +118,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
 		    tryToStartCar = true;
 		else {
 		    if (!car.stopped) {
-			System.out.println("Stopping car: " + car + " for traffic light.");
+			Map.LOGGER.config("Stopping car: " + car + " for traffic light.");
 			car.stop();
 		    }
 		}
@@ -127,16 +131,19 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	if (car.status == Car.TRANSIT)
         	    /* Nothing */;
         	else if (car.belongs.cross.waiting.get(0) != car && car.belongs.cross.waiting.size() > 1) {
+		    String intersectionInfo = "";
         	    if (!car.stopped) {
         		car.stop();
-        		System.out.print(car.toString() + " is stopped to avoid collision, intersection wait queue: ");
+			intersectionInfo += car.toString() +
+			    " is stopped to avoid collision, intersection wait queue: ";
         	    } else {
-        		System.out.print(car.toString() + " cannot start because intersection is still busy: ");
+			intersectionInfo += car.toString() +
+			    " cannot start because intersection is still busy: ";
         	    }
-        	    this.printIntersectionCars(car.belongs.cross);
-        	    System.out.println("");
+        	    intersectionInfo += this.intersectionCarString(car.belongs.cross);
+		    Map.LOGGER.config(intersectionInfo);
         	} else if ((car.belongs.cross.waiting.get(0) == car || car.belongs.cross.waiting.size() <= 1) && car.stopped) {
-        	    System.out.println(car.toString() + " is no longer in collision state, trying to start it ...");
+        	    Map.LOGGER.config(car.toString() + " is no longer in collision state, trying to start it ...");
         	    tryToStartCar = true;
         	}
             } else // If no cross road, just try start the car
@@ -147,22 +154,22 @@ class Map implements CarReceiver, TrafficLightReceiver{
 		    car.prepareExit(true);
 
 		if (car.to == null || car.to.capacity <= car.to.cars.size()) {
-        	    System.out.println(car.toString() + " is stopped because there is no exit available");
+        	    Map.LOGGER.config(car.toString() + " is stopped because there is no exit available");
         	    car.stop();
 		} else if (current.getTime() - car.belongs.lastExit.getTime() < Map.SAFE_EXIT_INTERVAL) {
-        	    System.out.println(car.toString() + " is running too close to the previous car. Trying to pause it");
+        	    Map.LOGGER.config(car.toString() + " is running too close to the previous car. Trying to pause it");
         	    car.stop();
         	    this.dispatcher.addCar(car, current, car.to);
 		} else {
-		    System.out.println("Exit road at: " + current + ", previous exit time: " + car.belongs.lastExit);
+		    Map.LOGGER.config(car + " exit at (" +
+				      car.belongs.lastExit + "->" + current +
+				      ") to " + car.to);
         	    if (car.stopped) {
         		car.start();
-        		System.out.println("Road " + car.to.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
         		car.belongs.lastExit = current;
         		//this.dispatcher.addCar(car, current, exit);
         	    } else {
         		car.start();
-        		System.out.println("Road " + car.to.toString() + ". lastExit: " + car.belongs.lastExit + " this exit " + current);
         		car.belongs.lastExit = current;
         	    }
 		}
@@ -182,12 +189,13 @@ class Map implements CarReceiver, TrafficLightReceiver{
         }
     }
     private void dumpCarList() {
-        System.err.print("Current known cars: [");
+        String carList = "Current known cars: [";
         for (Enumeration<Car> e = this.cars.elements(); e.hasMoreElements();) {
             Car known_car = e.nextElement();
-            System.err.print(known_car.id + " ");
+            carList += known_car.id + " ";
         }
-        System.err.println("]");
+        carList += "]";
+	Map.LOGGER.info(carList);
     }
     public synchronized void checkInactiveCars() {
         List<Integer> toBeRemoved = new ArrayList<Integer>();
@@ -197,7 +205,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	continue;
             Date current = new Date();
             if (current.getTime() - car.freshness.getTime() > Map.STOPPED_EXPIRY) {
-        	System.out.println("Car " + car.id + " has not sent any messages for over " + Map.STOPPED_EXPIRY + " ms. Removing it");
+        	Map.LOGGER.config("Car " + car.id + " has not sent any messages for over " + Map.STOPPED_EXPIRY + " ms. Removing it");
         	car.remove();
         	toBeRemoved.add(new Integer(car.id));
             }
@@ -216,12 +224,12 @@ class Map implements CarReceiver, TrafficLightReceiver{
 	    if (changed) {
 		Car car = light.getFirstCar(dir);
 		if (car != null && car.stopped && light.getColor(dir) == TrafficLight.LIGHT_GREEN) {
-		    System.out.println("Traffic light changed to green, checking car: " + car);
+		    Map.LOGGER.config("Traffic light changed to green, checking car: " + car);
 		    this.checkCar(car);
 		}
 	    }
 	} else
-	    System.err.println("Unknown traffic light id: " + id);
+	    Map.LOGGER.warning("Unknown traffic light id: " + id);
     }
     public synchronized void receiveCar (int carID, int dir, int pos, int speed) {
 	Date receivedDate = new Date();
@@ -231,9 +239,9 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	
         if (start == null && end == null) {
             if (pos == 0)
-        	System.err.println("Waiting for data for car: " + carID);
+        	Map.LOGGER.info("Waiting for data for car: " + carID);
             else
-        	System.out.println("Invalid pos: " + pos + " reported from car: " + carID);
+        	Map.LOGGER.warning("Invalid pos: " + pos + " reported from car: " + carID);
             return;
         }
         if (car == null) {
@@ -246,14 +254,14 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	car.status = Car.TRANSIT;
             this.cars.put(new Integer(car.id), car);
             car.switchTo(start==null?end:start, pos);
-            System.err.print("Car: " + carID + " has been added.");
+            Map.LOGGER.info("Car: " + carID + " has been added.");
             this.dumpCarList();
         } else if (stateIsUnchanged(car, start, end)) {
             car.freshness = new Date();
             if (car.freshness.getTime() - car.lastControl.getTime() > Map.CMD_RESEND_INTERVAL) {
         	// Re-send control command in case the car fail to start for whatever reason
         	if (speed == 0 && !car.stopped && !this.dispatcher.hasCar(car)) {
-        	    System.out.println("Resend control message to car: " + car.id);
+        	    Map.LOGGER.config("Resend control message to car: " + car.id);
         	    car.setSpeed(car.speed);
         	    car.lastControl = new Date();
         	}
@@ -273,7 +281,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	car.switchTo(end, pos);
         	car.status = Car.TRANSIT;
             }
-            System.out.println(car.freshness + ": " + car);
+            Map.LOGGER.config(car.freshness + ": " + car);
         }
         this.checkCar(car);
         this.checkStoppedCars(car);

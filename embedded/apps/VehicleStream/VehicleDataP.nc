@@ -63,6 +63,7 @@ module VehicleDataP {
       counter = 0;
     }
     call Timer.startPeriodic(1000);
+    call Leds.led0On();
     post startDoneTask();
     return SUCCESS;
   }
@@ -88,6 +89,7 @@ module VehicleDataP {
       if (++counter > STOP_TIMEOUT) {
         enqueue(&recvQueue, RECEIVE_QUEUE_LEN, &recvBuf);
         counter = 0;
+	call Leds.led2Toggle();
         post receiveQueueTask();
       }
     }

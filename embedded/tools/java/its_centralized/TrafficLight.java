@@ -1,5 +1,6 @@
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.*;
 
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
@@ -38,6 +39,8 @@ public class TrafficLight {
 
     public static final long EXPIRY_DURATION = 10 * 1000; // 10 seconds
     public static final int defaultColorDuration = 8;
+
+    static private Logger LOGGER = Logger.getLogger(TrafficLight.class.getName());
 
     public int id;
     public Date lastUpdate = null;
@@ -81,12 +84,12 @@ public class TrafficLight {
     }
     public void dumpColorInfo() {
 	Date cur = new Date();
-	System.out.print("Traffic Lights " + cur + ": " );
+	String dumpStr = "Traffic Lights " + cur + ": " ;
 	for (int dir = 0; dir < TrafficLight.DIR_UNKNOWN; dir++) {
 	    TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
-	    System.out.print(TrafficLight.dirString((short)dir) + ": " + TrafficLight.colorString((short)lightInfo.color) + ", ");
+	    dumpStr += TrafficLight.dirString((short)dir) + ": " + TrafficLight.colorString((short)lightInfo.color) + ", ";
 	}
-	System.out.println("");
+	TrafficLight.LOGGER.config(dumpStr);
     }
     public boolean updateInfo(int dir, int color, int remain) {
 	TrafficLightInfo lightInfo = this.info.get(new Integer(dir));
@@ -101,11 +104,11 @@ public class TrafficLight {
 	    lightInfo.update(this.invertColor(color), this.invertRemain(color, remain));
 	}
 	if (changed && (short)color != TrafficLight.LIGHT_YELLOW) {
-	    System.out.println("Received: " + TrafficLight.dirString((short)dir) + ": " + TrafficLight.colorString((short)color));
+	    TrafficLight.LOGGER.config("Received: " + TrafficLight.dirString((short)dir) + ": " + TrafficLight.colorString((short)color));
 	    this.dumpColorInfo();
-	    System.out.println("");
+	    TrafficLight.LOGGER.config("");
 	}
-	//System.out.println("Updating traffic light info, dir: " + dir + ", color: " + color + ", remain: " + remain);
+	//TrafficLight.LOGGER.config("Updating traffic light info, dir: " + dir + ", color: " + color + ", remain: " + remain);
 	this.lastUpdate = new Date();
 	return changed;
     }
@@ -177,7 +180,7 @@ public class TrafficLight {
     }
     public void messageReceived(int to, Message message) {
 	TrafficLightMsg msg = (TrafficLightMsg)message;
-	System.out.println("Dir: " + TrafficLight.dirString(msg.get_dir()) + ", color: " + TrafficLight.colorString(msg.get_color()) + ", remain: " + msg.get_remain());
+	TrafficLight.LOGGER.config("Dir: " + TrafficLight.dirString(msg.get_dir()) + ", color: " + TrafficLight.colorString(msg.get_color()) + ", remain: " + msg.get_remain());
     }
     private static void usage() {
 	System.err.println("usage: TrafficLight [-comm <source>]");
@@ -218,7 +221,7 @@ public class TrafficLight {
 	Packet comm = new Packet(mif);
 	TrafficLight tl = new TrafficLight(1, comm);
 
-	System.out.println("Starting the main loop");
+	TrafficLight.LOGGER.config("Starting the main loop");
 	while (true) {
 	    /*
 	    tl.setLight(TrafficLight.DIR_NORTH, TrafficLight.LIGHT_GREEN, 10);

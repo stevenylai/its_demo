@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.logging.*;
 
 class Road {
     public int startIC;
@@ -11,6 +12,8 @@ class Road {
     public CrossRoad cross;
     public TrafficLight trafficLight;
     public int trafficLightDir;
+    static private Logger LOGGER = Logger.getLogger(Road.class.getName());
+
     public Road (int startIC, int endIC, int capacity) {
 	this.startIC = startIC;
 	this.endIC = endIC;
@@ -30,7 +33,7 @@ class Road {
 	if (this.trafficLight == null)
 	    return true;
 	else {
-	    System.out.println("Current traffic light color: " + TrafficLight.colorString(this.trafficLight.getColor(this.trafficLightDir)));
+	    Road.LOGGER.config("Current traffic light color: " + TrafficLight.colorString(this.trafficLight.getColor(this.trafficLightDir)));
 	    /*
 	    if (this.trafficLight.askPass(this.trafficLightDir))
 		return true;
@@ -52,7 +55,7 @@ class Road {
 	for (Enumeration<Road> e = this.exitRoads.elements(); e.hasMoreElements();) {
 	    Road candidate = e.nextElement();
 	    if (candidate.capacity > candidate.cars.size()) {
-		//System.out.println("Capacity of " + candidate + ": " + candidate.capacity + ", currently used: " + candidate.cars.size() + ": " + candidate.cars);
+		//Road.LOGGER.config("Capacity of " + candidate + ": " + candidate.capacity + ", currently used: " + candidate.cars.size() + ": " + candidate.cars);
 		avail.add(candidate);
 	    } else if (best == null || (candidate.cars.size() - candidate.capacity) < (best.cars.size() - best.capacity)) {
 		best = candidate;

@@ -1,10 +1,12 @@
 import java.util.*;
+import java.util.logging.*;
 
 class Car {
     public final static int ENTERING = 0;
     public final static int LEAVING = 1;
     public final static int TRANSIT = 2;
     public final static int DEFAULT_SPEED = 3;
+    static private Logger LOGGER = Logger.getLogger(Car.class.getName());
 
     public int id;
     public boolean stopped;
@@ -25,7 +27,7 @@ class Car {
 	this.freshness = new Date();
 	this.lastControl = new Date();
 	this.stopped = false;
-	System.out.println("Creating car:" + this.toString());
+	Car.LOGGER.config("Creating car:" + this.toString());
     }
     public int getCurrentIC() {
 	if (this.status == Car.ENTERING) {
@@ -71,14 +73,14 @@ class Car {
     public void prepareExit(boolean allowNull) {
 	this.to = this.belongs.chooseExit(allowNull);	
 	if (this.to != null) {
-	    System.out.print(this.toString() + " is instructed to switch to " + this.to.toString());
+	    String logStr = this.toString() + " is instructed to switch to " + this.to.toString();
 	    if (this.lastMsgReceived != null) {
 		Date current = new Date();
-		System.out.println(". Time spent in decision making: " +
-				   (current.getTime() - this.lastMsgReceived.getTime()) + 
-				   " ms");
-	    } else
-		System.out.println("");
+		logStr += ". Time spent in decision making: " +
+		    (current.getTime() - this.lastMsgReceived.getTime()) + 
+		    " ms";
+	    }
+	    Car.LOGGER.config(logStr);
 	    
 	    this.turn(this.to);
 	}
@@ -124,9 +126,9 @@ class Car {
     }
     public void switchTo(Road newRoad, int newIC) {
 	int previousIC = this.getCurrentIC();
-	//System.out.println("Switching " + this.toString() + " to " + newRoad.toString());
+	//Car.LOGGER.config("Switching " + this.toString() + " to " + newRoad.toString());
 	if (this.belongs.cross != null) {
-	    //System.out.println("Removing car from the old intersection");
+	    //Car.LOGGER.config("Removing car from the old intersection");
 	    this.belongs.cross.waiting.remove(this);
 	}
 	if (newRoad != this.belongs) { // reset the state variables
@@ -135,11 +137,11 @@ class Car {
 	}
 	if (newRoad != this.belongs && this.status != Car.TRANSIT) {
 	    if (newIC == newRoad.startIC && this.status == Car.ENTERING)
-		System.err.println("IC card " + this.belongs.endIC +
-				   " for Car: " + this.id + " is skipped");
+		Car.LOGGER.warning("IC card " + this.belongs.endIC +
+				      " for Car: " + this.id + " is skipped");
 	    else if (newIC == newRoad.endIC)
-		System.err.println("IC card " + newRoad.startIC +
-				   " for Car: " + this.id + " is skipped");
+		Car.LOGGER.warning("IC card " + newRoad.startIC +
+				      " for Car: " + this.id + " is skipped");
 	}
 	this.belongs.cars.remove(this);
 	this.from = this.belongs;

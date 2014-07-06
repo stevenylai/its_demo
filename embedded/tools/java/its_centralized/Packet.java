@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.util.*;
 import java.text.*;
+import java.util.logging.*;
 
 import net.tinyos.message.*;
 import net.tinyos.packet.*;
@@ -34,66 +35,68 @@ public class Packet implements MessageListener, ITSSender, Runnable {
     private List<TrafficLightReceiver> trafficLightListeners;
     private Dictionary<Integer, MessageInfo> pendingAck;
     private List<MessageInfo> resendMsg;
-    private SimpleDateFormat format;
+    //private SimpleDateFormat format;
     private Thread checkTimeout;
+    static private Logger LOGGER = Logger.getLogger(Packet.class.getName());
+    static private String logFileName;
+
+    static {
+	DateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+	Date now = new Date();
+	Packet.logFileName = format.format(now) + ".log";
+    }
   
     public Packet(MoteIF moteIF) {
+	Packet.setupLoggers();
 	this.moteIF = moteIF;
 	this.moteIF.registerListener(new VehicleMsg(), this);
 	this.moteIF.registerListener(new TrafficLightMsg(), this);
-	Message ackMsg = new VehicleMsg();
-	//System.out.println("Ack AM type: " + ackMsg.amType() + " inverted: " + ((~ackMsg.amType()) & 0xff));
-	ackMsg.amTypeSet((~ackMsg.amType()) & 0xff);
-	this.moteIF.registerListener(ackMsg, this);
-	this.format = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss.S");
 	this.carListeners = new ArrayList<CarReceiver>();
 	this.trafficLightListeners = new ArrayList<TrafficLightReceiver>();
 	this.pendingAck = new Hashtable<Integer, MessageInfo>();
         this.checkTimeout = new Thread(this);
 	this.checkTimeout.start();
+	Packet.LOGGER.setLevel(Level.CONFIG);
+    }
+    static public void setupLoggers() {
+	Properties props = System.getProperties();
+	props.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS:%4$s/%2$s %5$s%6$s%n");
+	//Logger logger = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+	Logger logger = Logger.getLogger("");
+	/*
+	Logger rootLogger = Logger.getLogger("");
+	Handler[] handlers = rootLogger.getHandlers();
+	if (handlers[0] instanceof ConsoleHandler) {
+	    rootLogger.removeHandler(handlers[0]);
+	}
+	*/
+
+	logger.setLevel(Level.CONFIG);
+	SimpleFormatter formatter = new SimpleFormatter();
+	try {
+	    FileHandler fileHandler = new FileHandler(Packet.logFileName);
+	    fileHandler.setFormatter(formatter);
+	    fileHandler.setLevel(Level.CONFIG);
+	    logger.addHandler(fileHandler);
+	} catch (IOException e) {
+	    System.err.println("Error in setting up log file!");
+	}
+	/*
+	ConsoleHandler consoleHandler = new ConsoleHandler();
+	consoleHandler.setFormatter(formatter);
+	consoleHandler.setLevel(Level.INFO);
+	logger.addHandler(consoleHandler);
+	*/
     }
     public void sendPacket(int id, Message msg) {
-	//this.sendPacket(id, msg, true);
-	this.sendPacket(id, msg, false);
-    }
-    private void sendPacket(int id, Message msg, boolean addToPending) {
 	boolean success = false;
 	while (!success) {
 	    try {
-		Date current = new Date();
-		System.out.println(this.format.format(current) + ": sending packet " + msg);
+		Packet.LOGGER.config("sending packet to " + id + " :" + msg);
 		moteIF.send(id, msg);
-		if (addToPending)
-		    this.addPendingPacket(id, msg);
 		success = true;
 	    } catch (IOException e) {
 		success = false;
-	    }
-	}
-    }
-    synchronized public void addPendingPacket(int id, Message msg) {
-	MessageInfo msgInfo = new MessageInfo(id, msg);
-	this.pendingAck.put(new Integer(id), msgInfo);
-    }
-    synchronized public void ackedPacket(int id, Message msg) {
-	MessageInfo pending = this.pendingAck.get(new Integer(id));
-	if (pending != null) {
-	    byte [] expected = pending.message.dataGet();
-	    byte [] actual = msg.dataGet();
-	    boolean sameContent = true;
-	    if (expected.length != actual.length)
-		sameContent = false;
-	    else {		 
-		for (int i = 0; i < expected.length; i++)
-		    if (expected[i] != actual[i]) {
-			sameContent = false;
-			break;
-		    }
-	    }
-	    if (sameContent) {	
-		Date current = new Date();
-		System.out.println(this.format.format(current) + ": received ack for packet: " + pending.message);
-		this.pendingAck.remove(new Integer(id));
 	    }
 	}
     }
@@ -109,7 +112,7 @@ public class Packet implements MessageListener, ITSSender, Runnable {
 	while (true) {
 	    this.checkTimeout();
 	    for (MessageInfo msgInfo : this.resendMsg)
-		this.sendPacket(msgInfo.id, msgInfo.message, false);
+		this.sendPacket(msgInfo.id, msgInfo.message);
 	    try {
 		Thread.sleep(20);
 	    } catch (Exception e) {}
@@ -123,13 +126,10 @@ public class Packet implements MessageListener, ITSSender, Runnable {
     }
 
     public void messageReceived(int to, Message message) {
-	if (message.amType() == ((~(new VehicleMsg()).amType()) & 0xff)) {
-	    SerialPacket serialMsg = message.getSerialPacket();
-	    this.ackedPacket(serialMsg.get_header_dest(), message);
-	} else if (message.amType() == (new VehicleMsg()).amType()) {
+	if (message.amType() == (new VehicleMsg()).amType()) {
 	    VehicleMsg msg = (VehicleMsg)message;
 	    SerialPacket serialMsg = message.getSerialPacket();
-	    //System.out.println("Received packet " + msg + " Serial packet " + serialMsg);
+	    //Packet.LOGGER.config("Received packet " + msg + " Serial packet " + serialMsg);
 	    for (CarReceiver receiver : this.carListeners) {
 		receiver.receiveCar(serialMsg.get_header_src(), msg.get_dir(), msg.get_icnum(), msg.get_speed());
 	    }
@@ -141,12 +141,12 @@ public class Packet implements MessageListener, ITSSender, Runnable {
 	    }
 	    
 	} else {
-	    System.out.println("Unknown msg type: " + message.amType());
+	    Packet.LOGGER.warning("Unknown msg type: " + message.amType());
 	}
     }
   
     private static void usage() {
-	System.err.println("usage: TestSerial [-comm <source>]");
+	Packet.LOGGER.info("usage: TestSerial [-comm <source>]");
     }
   
     public static void main(String[] args) throws Exception {
@@ -180,7 +180,8 @@ public class Packet implements MessageListener, ITSSender, Runnable {
 	CarRemover remover = new CarRemover(its_map);
 	Thread remover_thread = new Thread(remover);
 	remover_thread.start();
-	System.err.println("##########################Starting up demo##########################");
+	Packet.LOGGER.info("##########################Starting up demo (" +
+			   Packet.logFileName + ")##########################");
 
 	while (true) {
 	    Thread.sleep(2000);
