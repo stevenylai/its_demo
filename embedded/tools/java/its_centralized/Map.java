@@ -161,9 +161,8 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	    car.stop();
         	    this.dispatcher.addCar(car, current, car.to);
 		} else {
-		    Map.LOGGER.config(car + " exit at (" +
-				      car.belongs.lastExit + "->" + current +
-				      ") to " + car.to);
+		    Map.LOGGER.config(car + " exit (pre:" +
+				      car.belongs.lastExit + ") to " + car.to);
         	    if (car.stopped) {
         		car.start();
         		car.belongs.lastExit = current;
@@ -281,7 +280,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	car.switchTo(end, pos);
         	car.status = Car.TRANSIT;
             }
-            Map.LOGGER.config(car.freshness + ": " + car);
+            Map.LOGGER.config(car.toString());
         }
         this.checkCar(car);
         this.checkStoppedCars(car);
