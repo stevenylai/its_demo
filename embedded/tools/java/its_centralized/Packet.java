@@ -35,7 +35,6 @@ public class Packet implements MessageListener, ITSSender, Runnable {
     private List<TrafficLightReceiver> trafficLightListeners;
     private Dictionary<Integer, MessageInfo> pendingAck;
     private List<MessageInfo> resendMsg;
-    //private SimpleDateFormat format;
     private Thread checkTimeout;
     static private Logger LOGGER = Logger.getLogger(Packet.class.getName());
     static private String logFileName;

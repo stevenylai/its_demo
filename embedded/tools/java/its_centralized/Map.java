@@ -173,8 +173,13 @@ class Map implements CarReceiver, TrafficLightReceiver{
         	    }
 		}
             }
-        } else
+        }
+	if (car.status == Car.ENTERING)
 	    car.prepareExit(false);
+	else if (car.status == Car.TRANSIT && !car.stopped) {
+	    car.switchTo(car.to, car.belongs.endIC);
+	    car.prepareExit(false);
+	}
     }
     private boolean stateIsUnchanged (Car car, Road in, Road out) {
         if (car.status == Car.ENTERING && car.belongs == in) {
@@ -267,7 +272,7 @@ class Map implements CarReceiver, TrafficLightReceiver{
             }
             return;
         } else {
-            car.freshness = new Date();
+            car.freshness = receivedDate;
 	    car.updateReceived(receivedDate);
             this.dispatcher.removeCar(car);
             if (start == null) { // Preparing to exit a road

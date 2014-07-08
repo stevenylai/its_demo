@@ -71,7 +71,7 @@ class Car {
         }
     }
     public void prepareExit(boolean allowNull) {
-	this.to = this.belongs.chooseExit(allowNull);	
+	this.to = this.belongs.chooseExit(allowNull);
 	if (this.to != null) {
 	    String logStr = this.toString() + " is instructed to switch to " + this.to.toString();
 	    if (this.lastMsgReceived != null) {
