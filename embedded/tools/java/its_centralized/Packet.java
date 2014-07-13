@@ -92,7 +92,7 @@ public class Packet implements MessageListener, ITSSender, Runnable {
 	boolean success = false;
 	while (!success) {
 	    try {
-		Packet.LOGGER.config("sending packet to " + id + " :" + msg);
+		Packet.LOGGER.fine("sending packet to " + id + " :" + msg);
 		moteIF.send(id, msg);
 		success = true;
 	    } catch (IOException e) {

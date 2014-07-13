@@ -186,8 +186,11 @@ class Map implements CarReceiver, TrafficLightReceiver{
             return true;
         } else if (car.status == Car.LEAVING && car.belongs == out) {
             return true;
-        } else if (car.status == Car.TRANSIT && car.belongs == out) {
-            return true;
+        } else if (car.status == Car.TRANSIT) {
+	    if (in != null && out != null && (car.belongs == out || car.belongs == in))
+		return true;
+	    else
+		return false;
         } else {
             return false;
         }
@@ -261,32 +264,35 @@ class Map implements CarReceiver, TrafficLightReceiver{
             Map.LOGGER.info("Car: " + carID + " has been added.");
             this.dumpCarList();
         } else if (stateIsUnchanged(car, start, end)) {
-            car.freshness = new Date();
-            if (car.freshness.getTime() - car.lastControl.getTime() > Map.CMD_RESEND_INTERVAL) {
-        	// Re-send control command in case the car fail to start for whatever reason
-        	if (speed == 0 && !car.stopped && !this.dispatcher.hasCar(car)) {
-        	    Map.LOGGER.config("Resend control message to car: " + car.id);
-        	    car.setSpeed(car.speed);
-        	    car.lastControl = new Date();
-        	}
-            }
-            return;
-        } else {
-            car.freshness = receivedDate;
+	    car.freshness = new Date();
+	    if (car.freshness.getTime() - car.lastControl.getTime() > Map.CMD_RESEND_INTERVAL) {
+		if (speed == 0 && !car.stopped && !this.dispatcher.hasCar(car)) {
+		    Map.LOGGER.warning("Car: " + car.id + " isn't stopped but hasn't moved for too long. Resending speed command");
+		    car.setSpeed(car.speed);
+		    car.lastControl = new Date();
+		}
+	    }
+	    return;
+	} else {
+	    if (speed > 0 && car.stopped)
+		Map.LOGGER.warning("Car: " + car.id + " speed is " + speed + " but should be stopped");
+	    else if (speed == 0 && !car.stopped && !this.dispatcher.hasCar(car))
+		Map.LOGGER.warning("Car: " + car.id + " speed is 0 but isn't stopped!");
+	    car.freshness = receivedDate;
 	    car.updateReceived(receivedDate);
-            this.dispatcher.removeCar(car);
-            if (start == null) { // Preparing to exit a road
-        	car.switchTo(end, pos);
-        	car.status = Car.LEAVING;
-            } else if (end == null) { // Entering a new road
-        	car.switchTo(start, pos);
-        	car.status = Car.ENTERING;
-            } else {
-        	car.switchTo(end, pos);
-        	car.status = Car.TRANSIT;
-            }
-            Map.LOGGER.config(car.toString());
-        }
+	    this.dispatcher.removeCar(car);
+	    if (start == null) { // Preparing to exit a road
+		car.switchTo(end, pos);
+		car.status = Car.LEAVING;
+	    } else if (end == null) { // Entering a new road
+		car.switchTo(start, pos);
+		car.status = Car.ENTERING;
+	    } else {
+		car.switchTo(end, pos);
+		car.status = Car.TRANSIT;
+	    }
+	    Map.LOGGER.fine(car.toString());
+	}
         this.checkCar(car);
         this.checkStoppedCars(car);
         this.keeper.checkInactiveCar(this.cars, this.dispatcher);
