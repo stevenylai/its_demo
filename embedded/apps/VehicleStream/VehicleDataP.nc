@@ -17,6 +17,7 @@ module VehicleDataP {
   VehicleMsg recvMsgBuf, *recvMsg, *sendMsg;
 
   vehicle_send_t sendBuf;
+  bool sendPending;
   error_t sendError;
 
   int counter;
@@ -58,6 +59,7 @@ module VehicleDataP {
       recvMsg = &recvMsgBuf;
       queue_clear(&recvQueue, RECEIVE_QUEUE_LEN);
 
+      sendPending = FALSE;
       sendBuf.preamble = 0xFF; // Always fixed
       sendBuf.id = TOS_NODE_ID;
       counter = 0;
@@ -95,21 +97,37 @@ module VehicleDataP {
     }
   }
 
+  task void sendMsgTask() {
+    atomic {
+      error_t err = call UartStream.send((uint8_t *)&sendBuf, sizeof(vehicle_send_t));
+      if (err)
+	post sendMsgTask();
+    }
+  }
   command error_t VehicleData.send(VehicleMsg *msg) {
     atomic {
       sendBuf.id = recvBuf.id;
       sendBuf.speed = msg->speed;
       sendBuf.dir = msg->dir;
       sendBuf.icnum = msg->icnum;
-      sendError = call UartStream.send((uint8_t *)&sendBuf, sizeof(vehicle_send_t));
+      sendPending = TRUE;
+      post sendMsgTask();
     }
     sendMsg = msg;
-    atomic return sendError;
+    return SUCCESS;
   }
   task void sendMsgDoneTask() {
     error_t tmpError;
-    atomic tmpError = sendError;
-    signal VehicleData.sendDone(sendMsg, tmpError);
+    bool tmpPending;
+    atomic {
+      tmpError = sendError;
+      tmpPending = sendPending;
+      if (sendPending)
+	sendPending = FALSE;
+    }
+    if (tmpPending)
+      signal VehicleData.sendDone(sendMsg, tmpError);
+    post sendMsgTask();
   }
   async event void UartStream.sendDone( uint8_t* buf, uint16_t len, error_t error ) {
     atomic sendError = error;

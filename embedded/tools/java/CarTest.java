@@ -33,7 +33,7 @@ public class CarTest {
 	    for (int i = 3; i < this.input.length; i++) {
 		this.input[i] = this.counter;
 	    }
-	    //System.out.println("Writing: " + String.format("0x%02X ", this.counter));
+	    System.out.println("Writing: " + String.format("0x%02X ", this.counter));
 	    this.port.writeBytes(this.input);
 	    boolean finished = false;
 
@@ -46,11 +46,13 @@ public class CarTest {
 		    }
 		    finished = true;
 		} else {
+		    /*
 		    System.out.print("Error in getting input. Expected: " + String.format("0x%02X ", this.counter));
 		    System.out.print(". Actual: ");
 		    for (int i = 0; i < read; i++)
 			System.out.print(String.format("0x%02X ", output[i]) + " ");
 		    System.out.println("");
+		    */
 		}
 	    }
 	    /*

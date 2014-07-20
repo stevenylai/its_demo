@@ -276,8 +276,6 @@ class Map implements CarReceiver, TrafficLightReceiver{
 	} else {
 	    if (speed > 0 && car.stopped)
 		Map.LOGGER.warning("Car: " + car.id + " speed is " + speed + " but should be stopped");
-	    else if (speed == 0 && !car.stopped && !this.dispatcher.hasCar(car))
-		Map.LOGGER.warning("Car: " + car.id + " speed is 0 but isn't stopped!");
 	    car.freshness = receivedDate;
 	    car.updateReceived(receivedDate);
 	    this.dispatcher.removeCar(car);
