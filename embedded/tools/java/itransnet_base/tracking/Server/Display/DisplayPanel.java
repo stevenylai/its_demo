@@ -39,78 +39,76 @@ import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class DisplayPanel extends JPanel implements Runnable, SensorConstants
-{
-	// Variables configured by configurer
-  private static int PWIDTH = 500;   // size of panel
-  private static int PHEIGHT = 400;
-  private long period;                // period between drawing in _nanosecs_
+public class DisplayPanel extends JPanel implements Runnable, SensorConstants {
+    // Variables configured by configurer
+    private static int PWIDTH = 500;   // size of panel
+    private static int PHEIGHT = 400;
+    private long period;                // period between drawing in _nanosecs_
 
 
-	//private static long MAX_STATS_INTERVAL = 1000000000L;
-	private static long MAX_STATS_INTERVAL = 1000L;
+    //private static long MAX_STATS_INTERVAL = 1000000000L;
+    private static long MAX_STATS_INTERVAL = 1000L;
     // record stats every 1 second (roughly)
 
-  private static final int NO_DELAYS_PER_YIELD = 16;
-  /* Number of frames with a delay of 0 ms before the animation thread yields
-     to other running threads. */
+    private static final int NO_DELAYS_PER_YIELD = 16;
+    /* Number of frames with a delay of 0 ms before the animation thread yields
+       to other running threads. */
 
-  private static int MAX_FRAME_SKIPS = 5;   // was 2;
+    private static int MAX_FRAME_SKIPS = 5;   // was 2;
     // no. of frames that can be skipped in any one animation loop
     // i.e the games state is updated but not rendered
 
-  private static int NUM_FPS = 10;
-     // number of FPS values stored to get an average
+    private static int NUM_FPS = 10;
+    // number of FPS values stored to get an average
 
 
-  // used for gathering statistics
-  private long statsInterval = 0L;    // in ns
-  private long prevStatsTime;   
-  private long totalElapsedTime = 0L;
-  private long gameStartTime;
-  private int timeSpentInGame = 0;    // in seconds
+    // used for gathering statistics
+    private long statsInterval = 0L;    // in ns
+    private long prevStatsTime;   
+    private long totalElapsedTime = 0L;
+    private long gameStartTime;
+    private int timeSpentInGame = 0;    // in seconds
 
-  private long frameCount = 0;
-  private double fpsStore[];
-  private long statsCount = 0;
-  private double averageFPS = 0.0;
+    private long frameCount = 0;
+    private double fpsStore[];
+    private long statsCount = 0;
+    private double averageFPS = 0.0;
 
-  private long framesSkipped = 0L;
-  private long totalFramesSkipped = 0L;
-  private double upsStore[];
-  private double averageUPS = 0.0;
+    private long framesSkipped = 0L;
+    private long totalFramesSkipped = 0L;
+    private double upsStore[];
+    private double averageUPS = 0.0;
 
+    private DecimalFormat df = new DecimalFormat("0.##");  // 2 dp
+    private DecimalFormat timedf = new DecimalFormat("0.####");  // 4 dp
 
-  private DecimalFormat df = new DecimalFormat("0.##");  // 2 dp
-  private DecimalFormat timedf = new DecimalFormat("0.####");  // 4 dp
+    private Thread animator;           // the thread that performs the animation
+    private boolean running = false;   // used to stop the animation thread
+    private boolean isPaused = false;
 
-
-  private Thread animator;           // the thread that performs the animation
-  private boolean running = false;   // used to stop the animation thread
-  private boolean isPaused = false;
-
-
-	// Project related modules
-  private Manager mgr;
-  private Map map;
-  private PanelListener listener;
-  private ImagesLoader imsLoader;
-  // Not used now.
-	private ImageSFXs imageSfx;
-  private final static String IMS_FILE = "imsInfo.txt";
+    // Project related modules
+    private Manager mgr;
+    private Map map;
+    private PanelListener listener;
+    private ImagesLoader imsLoader;
+    // Not used now.
+    private ImageSFXs imageSfx;
+    private final static String IMS_FILE = "imsInfo.txt";
 	
-  // used at game termination
-  private int score = 0;
-  private Font font;
-  private FontMetrics metrics;
+    // used at game termination
+    private int score = 0;
+    private Font font;
+    private FontMetrics metrics;
 
-  // off screen rendering
-  private Graphics dbg; 
-  private Image dbImage = null;
+    // off screen rendering
+    private Graphics dbg; 
+    private Image dbImage = null;
   
-  private BufferedImage bridge1 = new BufferedImage(30, 50,BufferedImage.TYPE_INT_ARGB);
-  private BufferedImage bridge2 = new BufferedImage(30, 50,BufferedImage.TYPE_INT_ARGB);
-  private BufferedImage bridge3 = new BufferedImage(30, 50,BufferedImage.TYPE_INT_ARGB);
+    /*
+      private BufferedImage bridge1 = new BufferedImage(30, 50,BufferedImage.TYPE_INT_ARGB);
+      private BufferedImage bridge2 = new BufferedImage(30, 50,BufferedImage.TYPE_INT_ARGB);
+      private BufferedImage bridge3 = new BufferedImage(30, 50,BufferedImage.TYPE_INT_ARGB);
+    */
   
   public DisplayPanel(Manager mgr)
   {
@@ -136,7 +134,7 @@ public class DisplayPanel extends JPanel implements Runnable, SensorConstants
       fpsStore[i] = 0.0;
       upsStore[i] = 0.0;
     }
-    
+    /*
     try {
 		bridge1=ImageIO.read(new File("c:/bridge1.JPG"));
 		bridge2=ImageIO.read(new File("c:/bridge2.JPG"));
@@ -146,6 +144,7 @@ public class DisplayPanel extends JPanel implements Runnable, SensorConstants
 		e.printStackTrace();
 	}
     System.out.println("Create Birdge successful") ;  
+    */
     
   }  // end of DisplayPanel()
 
@@ -665,21 +664,21 @@ public class DisplayPanel extends JPanel implements Runnable, SensorConstants
 				//dbg.drawImage(bridge1, 323, 620, bridge1.getWidth(), bridge1.getHeight(), null);
 				//dbg.drawImage(bridge1, 305, 589, bridge1.getWidth(), bridge1.getHeight(), null);
 				//dbg.drawImage(bridge1, 258, 548, bridge1.getWidth(), bridge1.getHeight(), null);
-				dbg.drawImage(bridge1, 258, 509, bridge1.getWidth(), bridge1.getHeight(), null);
+				//dbg.drawImage(bridge1, 258, 509, bridge1.getWidth(), bridge1.getHeight(), null);
 				
                 //dbg.fillRect(480,590,70,50);
                 //dbg.drawImage(bridge2, 480, 589, bridge1.getWidth(), bridge1.getHeight(), null);
                 //dbg.drawImage(bridge2, 505, 620, bridge1.getWidth(), bridge1.getHeight(), null);
 				//dbg.drawImage(bridge2, 480, 589, bridge1.getWidth(), bridge1.getHeight(), null);
 				//dbg.drawImage(bridge2, 412, 548, bridge1.getWidth(), bridge1.getHeight(), null);
-				dbg.drawImage(bridge2, 412, 509, bridge1.getWidth(), bridge1.getHeight(), null);
+				//dbg.drawImage(bridge2, 412, 509, bridge1.getWidth(), bridge1.getHeight(), null);
 				
                 //dbg.fillRect(715,590,70,50);
                 //dbg.drawImage(bridge3, 715, 589, bridge1.getWidth(), bridge1.getHeight(), null);
                 //dbg.drawImage(bridge3, 750, 620, bridge1.getWidth(), bridge1.getHeight(), null);
 				//dbg.drawImage(bridge3, 715, 589, bridge1.getWidth(), bridge1.getHeight(), null);
 				//dbg.drawImage(bridge3, 615, 548, bridge1.getWidth(), bridge1.getHeight(), null);
-				dbg.drawImage(bridge3, 615, 509, bridge1.getWidth(), bridge1.getHeight(), null);
+				//dbg.drawImage(bridge3, 615, 509, bridge1.getWidth(), bridge1.getHeight(), null);
                 
                 //java.awt.Toolkit.getDefaultToolkit().beep();   
                

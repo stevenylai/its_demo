@@ -482,10 +482,6 @@ public class AnimatedCar implements SensorConstants {
 		      } 
 		    */           		
             	}
-            	
-            	
-            	
-            	
             	if(this.getOrient()==S & this.getRealCar().getTurnDirection()== DefaultSensor.DIRECTION_L.intValue()){
 		    orient=this.SE;	
             		
