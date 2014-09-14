@@ -13,9 +13,7 @@ public class Car implements SensorConstants
 	private short direction; // Moving direction of the car
 	
 	private int turnDirection=-1;
-	
-	
-	
+
 	// Various kinds of speed measurement of the car
 	private double averageSpeed; // speed measured from the total distance
 	private double lastPortionSpeed; // Speed measured from last 2 sensors
@@ -48,7 +46,13 @@ public class Car implements SensorConstants
 		turnDirection=2;
 	}
 
-	public void setRoad (Road r, double initposition) { road = r; pos = initposition; setDirection(r.getDirection()); if(fakeCar!=null)fakeCar.updatePos(map);}
+	public void setRoad (Road r, double initposition) {
+	    road = r;
+	    pos = initposition;
+	    setDirection(r.getDirection());
+	    if(fakeCar!=null)
+		fakeCar.updatePos(map);
+	}
 	public void setRoad (Road r) { road = r; if(fakeCar!=null)fakeCar.updatePos(map);}
 	public void setAnimatedCar (AnimatedCar ac) {fakeCar = ac;}
 	

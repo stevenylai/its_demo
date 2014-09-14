@@ -16,7 +16,6 @@ import itransnet_base.tracking.Server.DataEngine.DefaultSensor;
 import itransnet_base.tracking.Server.DataEngine.Map;
 import itransnet_base.tracking.Server.DataEngine.Road;
 import itransnet_base.tracking.Server.Manager.Manager;
-import itransnet_base.tracking.Server.Manager.SensorDriver;
 import itransnet_base.tracking.Server.Manager.SensorManager;
 import itransnet_base.tracking.Utility.Coordinate;
 import itransnet_base.tracking.Utility.SensorConstants;
@@ -579,7 +578,7 @@ public class DisplayPanel extends JPanel implements Runnable, SensorConstants
 			AnimatedCar c = (AnimatedCar)animatedCar.get(i);
 			//dbg.drawImage(bridge1, 305, 589, bridge1.getWidth(), bridge1.getHeight(), null);
 			//dbg.drawImage(bridge1, 263, 548, bridge1.getWidth(), bridge1.getHeight(), null);
-			System.out.println("car size  !" + animatedCar.size());
+			//System.out.println("car size  !" + animatedCar.size());
 			
 			if(!c.readyForRender())
 			{

@@ -37,27 +37,10 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
     private SummaryWindow summaryDisplay; // Summary display window
     // Enable driver which is used for testing
     private boolean driverEnabled = false;
-    private SensorDriver d;
     private int operCode;
     private int lastWarVid = 0;
 
-    //private boolean localTesting = true;
-    /**
-     * Creates a Manager instance.
-     * <p>
-     * The Manager is initialized to listen to the Serial Forward's port
-     * and it will create different components of the program such as map
-     * and GUI
-     */
-    private void RedrawSensorDriver()
-    {
-	d.dispose();
-	d = new SensorDriver(this);
-	Thread driverThread = new Thread (d);
-	driverThread.start();
-    }
-    public SensorManager(String configFile)
-    {
+    public SensorManager(String configFile) {
 	operCode = OPER_EVERY_MSG * OPER_SUMMARY_MSG * OPER_LIGHT;
 	//mote = new MoteIF(PrintStreamMessenger.err,125);
 	mote = new MoteIF();
@@ -69,18 +52,19 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	configure = new Properties();
 	if (configFile!=null) {
 	    try {
-		configure.load(new FileInputStream(configFile));
+		//configure.load(new FileInputStream(configFile));
+		configure.load(getClass().getResourceAsStream(configFile));
 	    } catch (IOException e) {
+		e.printStackTrace();
 	    }
 	}
 	String mapfile = getMapFile();
-	if (map!=null){
+	if (map!=null) {
 	    //map.loadMap(getMapFile());
 	    map=Map.defaultMap;
 	}
 		
 	display = new MainWindow(this);
-	d = new SensorDriver(this);
 	statisticsWin=new StatisticsWindow();		
     }
 
@@ -93,8 +77,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
      * @param		dest_addr	The destination address of the packet.
      * @param		msg				The message returned.
      */
-    public void messageReceived(int dest_addr, Message msg)
-    {
+    public void messageReceived(int dest_addr, Message msg) {
 	// Create a new thread to handle the message
 	if (driverEnabled) {
 	    System.out.println("Dummy Message received without error");
@@ -139,11 +122,10 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
      * <p>
      * The manager will create a separate thread for GUI and listen to Serial Forward itself.
      */
-    public void run()
-    {
+    public void run() {
 	// Register for listening to messages
 	System.out.println("Run...");
-	if (!driverEnabled){
+	if (!driverEnabled) {
 	    mote.registerListener(new VehicleMsg(), this);
 	    //mote.start();
 	}
@@ -154,11 +136,6 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 		
 	if (displaySummary()) {
 	    showSummary();
-	}
-		
-	// Driver thread
-	if (driverEnabled) {			
-	    RedrawSensorDriver();
 	}
 	try {
 	    while (true) {
@@ -175,8 +152,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	displayThread.start();
     }
 	
-    public void changeMap (File newFile)
-    {
+    public void changeMap (File newFile) {
 	System.out.println("Received command to change file: file:///"+newFile.getPath().replace('\\', '/'));//+"/"+newFile.getName());
 	String mapfile = newFile.getPath().replace('\\', '/');
 	configure.setProperty("map", mapfile);
@@ -184,14 +160,12 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	map.loadMap(getMapFile());
 	display.mapChanged(this);
 		
-	if (displaySummary())
-	    {
-		summaryDisplay.dispose();
-		showSummary();
-	    }
+	if (displaySummary()) {
+	    summaryDisplay.dispose();
+	    showSummary();
+	}
     }
-    public void reloadMap()
-    {
+    public void reloadMap() {
 	//System.out.println("Received command to reload map.");
 	map = new Map();
 	map.loadMap(getMapFile());
@@ -201,49 +175,34 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	    summaryDisplay.dispose();
 	    showSummary();
 	}
-		
-	if (driverEnabled) {
-	    RedrawSensorDriver();
-	}
     }
 
-    public void clearMap()
-    {
+    public void clearMap() {
 	System.out.println("Received command to clear map.");
 	map = new Map();
 	map.loadMap(getMapFile());
 	display.mapChanged(this);
 		
-	if (displaySummary())
-	    {
-		summaryDisplay.dispose();
-		showSummary();
-	    }
-		
-	if (driverEnabled)
-	    {
-		RedrawSensorDriver();
-	    }
+	if (displaySummary()) {
+	    summaryDisplay.dispose();
+	    showSummary();
+	}
     }
 
-    public void updatOperation(int operCode)
-    {
+    public void updatOperation(int operCode) {
 	System.out.println("Received command to change operation to "+operCode);
 	this.operCode = operCode;
 	reloadMap(); // Simpler in coding but result in energy inefficiency
     }
-    public void enableDriver()
-    {
+    public void enableDriver() {
 	driverEnabled = true;
     }
 	
-    public short getOperationMode()
-    {
+    public short getOperationMode() {
 	return 	(short)operCode;
     }
 	
-    public boolean simpleMode()
-    {
+    public boolean simpleMode() {
 	return false;
     }
 	
@@ -258,40 +217,35 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	configure.setProperty("panelHeight", Integer.toString((int)(newunit*unitheight)));
 	configure.setProperty("unit", Double.toString(newunit));
     }
-    public String getMapFile ()
-    {
+    public String getMapFile () {
 	String mapfile = configure.getProperty("map");
 	if (mapfile!=null)
 	    return "file:///"+mapfile;
 	else
 	    return null;
     }
-    public String getDumpFile ()
-    {
+    public String getDumpFile () {
 	String dumpfile = configure.getProperty("dump");
 	if (dumpfile!=null)
 	    return dumpfile;
 	else
 	    return null;
     }
-    public String getTargetFile ()
-    {
+    public String getTargetFile () {
 	String targetfile = configure.getProperty("target");
 	if (targetfile!=null)
 	    return targetfile;
 	else
 	    return null;
     }
-    public String getMapDir ()
-    {
+    public String getMapDir () {
 	String mapdir = configure.getProperty ("mapdir");
 	if (mapdir!=null)
 	    return mapdir;
 	else
 	    return null;
     }
-    public long getRefreshPeriod()
-    {
+    public long getRefreshPeriod() {
 	String refreshPeriod = configure.getProperty ("refreshPeriod");
 	long period = 50L; // Default value
 	try {
@@ -300,8 +254,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	return period;
     }
 	
-    public int getSumaryPanelWidth ()
-    {
+    public int getSumaryPanelWidth () {
 	String sumPanelWidth = configure.getProperty ("summaryPanelWidth");
 	int width = 60; // Default value
 	try {
@@ -309,8 +262,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	} catch (Exception e) {}
 	return width;
     }
-    public int getSumaryPanelHeight()
-    {
+    public int getSumaryPanelHeight() {
 	String sumPanelHeight = configure.getProperty ("summaryPanelHeight");
 	int height = 48; // Default value
 	try {
@@ -318,8 +270,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	} catch (Exception e) {}
 	return height;
     }
-    public int getPanelWidth()
-    {
+    public int getPanelWidth() {
 	String panelWidth = configure.getProperty ("panelWidth");
 	int width = 680; // Default value
 	try {
@@ -327,8 +278,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	} catch (Exception e) {}
 	return width;
     }
-    public int getPanelHeight()
-    {
+    public int getPanelHeight() {
 	String panelHeight = configure.getProperty ("panelHeight");
 	int height = 520; // Default value
 	try {
@@ -337,8 +287,7 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 	return height;
     }
 	
-    public double getUnit()
-    {
+    public double getUnit() {
 	String unitString = configure.getProperty ("unit");
 	double unit = 58.0; // Default value
 	try {
@@ -347,24 +296,21 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
   	return unit;
     }
 
-    public boolean displaySummary ()
-    {
+    public boolean displaySummary () {
 	String boolString = configure.getProperty ("displaySummary");
 	boolean result = false; // Default value
 	if (boolString!=null)
 	    result=Boolean.valueOf(boolString).booleanValue();
   	return result;
     }
-    public boolean drawSensor ()
-    {
+    public boolean drawSensor () {
 	String boolString = configure.getProperty ("drawSensor");
 	boolean result = true; // Default value
 	if (boolString!=null)
 	    result=Boolean.valueOf(boolString).booleanValue();
   	return result;
     }
-    public boolean drawSensorID ()
-    {
+    public boolean drawSensorID () {
 	String boolString = configure.getProperty ("drawSensorID");
 	boolean result = true; // Default value
 	if (boolString!=null) {
@@ -374,22 +320,14 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
   	return result;
     }
   
-    public static void main (String[] args)
-    {
-	//String itransnetdir="C:/Program Files/Programming/cygwin/opt/tinyos-1.x/contrib/iTranSNet/tools/java";
-	//String itransnetdir = Env.getenv("TOSROOT_WIN").replace('\\', '/')+"/contrib/iTranSNet/tools/java";
-
-	String itransnetdir = "C:/tinyos/cygwin/opt/tinyos-1.x/contrib/iTranSNet/tools/java/";
-	//String itransnetdir = "D:/wtp-its/workspace/ITS-tool/";
+    public static void main (String[] args) {
+	String itransnetdir = "/itransnet_base";
 	System.out.println(itransnetdir);
-	boolean driver = false;
 	int num = 1;
 
 	if (args.length >0) {
 	    for (int i=0; i<args.length; i++) {
-		if (args[i].compareToIgnoreCase("-driver")==0)
-		    driver = true;
-		else if (args[i].startsWith("-n="))
+		if (args[i].startsWith("-n="))
 		    try {
 			num=Integer.parseInt(args[i].split("=")[1]);
 		    } catch (Exception e) {
@@ -397,9 +335,6 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 		    }
 	    }	
 	}
-	//debug
-	//driver = true;
-		
 		
 	SensorManager [] test = new SensorManager [num];
 	Thread [] testThread = new Thread[num];
@@ -408,8 +343,6 @@ public class SensorManager implements MessageListener, Runnable, Manager, Sensor
 		test[i] = new SensorManager(itransnetdir+"/its.properties");
 	    else
 		test[i] = new SensorManager (null);
-	    if (driver)
-		test[i].enableDriver();
 	    testThread[i] = new Thread (test[i]);
 	    testThread[i].start();
 	    try {
